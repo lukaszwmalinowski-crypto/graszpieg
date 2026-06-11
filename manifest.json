@@ -1,0 +1,18 @@
+{
+  "name": "Szpieg",
+  "short_name": "Szpieg",
+  "description": "Gra dedukcyjna na pytania, blef i uważne słuchanie.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "theme_color": "#101623",
+  "background_color": "#090d14",
+  "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

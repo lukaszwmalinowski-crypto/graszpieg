@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101623">
+    <title>Szpieg - gra dedukcyjna</title>
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="./icons/icon.svg">
+    <link rel="stylesheet" href="./styles.css?v=2">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <button class="icon-button" id="backButton" type="button" aria-label="Wróć" title="Wróć">‹</button>
+        <div>
+          <p class="kicker">wieczorna gra towarzyska</p>
+          <h1 id="screenTitle">Szpieg</h1>
+        </div>
+        <button class="icon-button" id="fullscreenButton" type="button" aria-label="Pełny ekran" title="Pełny ekran">⛶</button>
+      </header>
+
+      <main id="app" aria-live="polite"></main>
+
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    </div>
+
+    <script src="./places.js"></script>
+    <script src="./app.js?v=2"></script>
+  </body>
+</html>
