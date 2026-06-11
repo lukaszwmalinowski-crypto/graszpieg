@@ -17,6 +17,11 @@
   --shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
   --shadow-tight: 0 14px 34px rgba(0, 0, 0, 0.34);
   --texture: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.024) 0 1px, transparent 1px 9px);
+  --space-1: 8px;
+  --space-2: 12px;
+  --space-3: 18px;
+  --space-4: 24px;
+  --space-5: 34px;
 }
 
 * {
@@ -57,21 +62,21 @@ button {
 }
 
 .app-shell {
-  width: min(100%, 980px);
+  width: min(100%, 1040px);
   min-height: 100vh;
   margin: 0 auto;
-  padding: 18px 18px 28px;
+  padding: var(--space-3) var(--space-3) var(--space-5);
 }
 
 .topbar {
   display: grid;
   grid-template-columns: 44px 1fr 44px;
-  gap: 12px;
+  gap: var(--space-2);
   align-items: center;
   min-height: 70px;
-  margin-bottom: 10px;
+  margin-bottom: var(--space-4);
   border-bottom: 1px solid var(--line-soft);
-  padding-bottom: 12px;
+  padding-bottom: var(--space-2);
 }
 
 .topbar:has(#backButton.hidden) {
@@ -102,11 +107,19 @@ h1 {
   margin-bottom: 0;
   font-size: clamp(1.55rem, 7vw, 3.1rem);
   letter-spacing: 0;
+  line-height: 0.98;
 }
 
 h2 {
+  margin-bottom: var(--space-4);
   font-size: clamp(1.55rem, 6vw, 2.8rem);
   letter-spacing: 0;
+  line-height: 1;
+}
+
+.panel > h2:first-child {
+  margin-bottom: var(--space-4);
+  font-size: clamp(1.9rem, 5vw, 2.65rem);
 }
 
 h3 {
@@ -126,7 +139,7 @@ h3 {
   min-height: calc(100vh - 130px);
   display: grid;
   align-content: center;
-  gap: 20px;
+  gap: var(--space-4);
 }
 
 .hero-head {
@@ -162,7 +175,7 @@ h3 {
 .rule-list,
 .help-list {
   display: grid;
-  gap: 12px;
+  gap: var(--space-2);
   padding: 0;
   margin: 0;
   list-style: none;
@@ -191,7 +204,7 @@ h3 {
 .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: var(--space-2);
   align-items: center;
 }
 
@@ -296,17 +309,17 @@ h3 {
 }
 
 .panel {
-  padding: clamp(18px, 4vw, 34px);
+  padding: clamp(20px, 4vw, 36px);
 }
 
 .form-grid {
   display: grid;
-  gap: 18px;
+  gap: var(--space-3);
 }
 
 .field {
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
   font-family: system-ui, sans-serif;
 }
 
@@ -344,7 +357,7 @@ textarea {
 .segmented {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .segmented button {
@@ -364,13 +377,13 @@ textarea {
 .mini-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .check-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: var(--space-2);
 }
 
 .check-card {
@@ -378,7 +391,7 @@ textarea {
   grid-template-columns: 22px 1fr;
   gap: 10px;
   align-items: center;
-  min-height: 58px;
+  min-height: 56px;
   border: 1px solid var(--line-soft);
   border-radius: 8px;
   padding: 12px;
@@ -411,13 +424,17 @@ textarea {
 .cards-grid,
 .vote-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: var(--space-3);
+}
+
+.names-grid {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
 }
 
 .player-card {
   position: relative;
-  min-height: 150px;
+  min-height: 156px;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 18px 18px 16px;
@@ -468,10 +485,10 @@ textarea {
 .status-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: var(--space-2);
   justify-content: space-between;
   align-items: center;
-  margin: 0 0 18px;
+  margin: 0 0 var(--space-3);
   border: 1px solid var(--line-soft);
   border-radius: 8px;
   padding: 12px 14px;
@@ -482,7 +499,7 @@ textarea {
 
 .deal-screen {
   display: grid;
-  min-height: calc(100vh - 140px);
+  min-height: calc(100vh - 164px);
   place-items: center;
   text-align: center;
 }
@@ -533,7 +550,7 @@ textarea {
 .flip-stage {
   position: relative;
   display: grid;
-  min-height: calc(100vh - 150px);
+  min-height: calc(100vh - 164px);
   place-items: center;
   perspective: 1300px;
   overflow: hidden;
@@ -553,8 +570,8 @@ textarea {
 
 .flip-card {
   position: relative;
-  width: min(92vw, 560px);
-  min-height: min(66vh, 560px);
+  width: min(92vw, 620px);
+  min-height: min(66vh, 540px);
   transform-style: preserve-3d;
   animation: cardEnter 420ms cubic-bezier(.2, .8, .2, 1) both;
   z-index: 1;
@@ -564,14 +581,9 @@ textarea {
   transform: none;
 }
 
-.flip-card.just-flipped {
-  animation: flipSettle 820ms cubic-bezier(.18, .82, .24, 1) both;
-}
-
 .flip-card.is-flipped .flip-back {
-  opacity: 0;
   pointer-events: none;
-  transform: rotateY(180deg) scale(0.98);
+  transform: rotateY(180deg);
 }
 
 .flip-face {
@@ -581,7 +593,7 @@ textarea {
   place-items: center;
   border: 2px solid var(--line);
   border-radius: 8px;
-  padding: clamp(24px, 8vw, 56px);
+  padding: clamp(24px, 7vw, 54px);
   background:
     radial-gradient(circle at center, rgba(217, 182, 91, 0.15), transparent 50%),
     var(--texture),
@@ -590,7 +602,7 @@ textarea {
   text-align: center;
   backface-visibility: hidden;
   overflow: hidden;
-  transition: transform 760ms cubic-bezier(.18, .82, .24, 1), opacity 260ms ease;
+  transition: transform 680ms cubic-bezier(.2, .78, .2, 1), box-shadow 220ms ease;
 }
 
 .flip-face::before {
@@ -600,17 +612,6 @@ textarea {
   border-radius: 7px;
   content: "";
   pointer-events: none;
-}
-
-.flip-face::after {
-  position: absolute;
-  inset: -45% auto -45% -55%;
-  width: 42%;
-  background: linear-gradient(90deg, transparent, rgba(255, 246, 214, 0.34), transparent);
-  content: "";
-  opacity: 0;
-  pointer-events: none;
-  transform: rotate(18deg);
 }
 
 .flip-back {
@@ -650,23 +651,13 @@ textarea {
 }
 
 .flip-front {
-  opacity: 0;
   pointer-events: none;
-  transform: rotateY(-180deg) scale(0.98);
+  transform: rotateY(-180deg);
 }
 
 .flip-card.is-flipped .flip-front {
-  opacity: 1;
   pointer-events: auto;
-  transform: rotateY(0) scale(1);
-}
-
-.flip-card.just-flipped .flip-front::after {
-  animation: cardShine 760ms ease 160ms both;
-}
-
-.flip-card.just-flipped .flip-front {
-  animation: frontGlow 820ms ease both;
+  transform: rotateY(0);
 }
 
 .flip-card.spy-card .flip-front {
@@ -701,12 +692,14 @@ textarea {
 .role-name {
   color: var(--gold);
   font-family: system-ui, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 800;
   text-transform: uppercase;
 }
 
 .place-name,
 .spy-name {
-  margin: 16px 0;
+  margin: var(--space-3) 0;
   font-size: clamp(2rem, 11vw, 5rem);
   line-height: 1;
 }
@@ -742,7 +735,7 @@ textarea {
   grid-template-columns: minmax(220px, 300px) 1fr;
   gap: clamp(16px, 4vw, 28px);
   align-items: center;
-  margin: 20px 0;
+  margin: var(--space-3) 0 var(--space-4);
 }
 
 .timer-ring {
@@ -783,7 +776,9 @@ textarea {
 }
 
 .question-card {
-  min-height: 240px;
+  display: grid;
+  align-content: center;
+  min-height: 260px;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: clamp(18px, 4vw, 28px);
@@ -819,9 +814,9 @@ textarea {
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: 12px;
-  margin: 18px 0;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
 }
 
 .summary-tile {
@@ -910,44 +905,6 @@ textarea {
   }
 }
 
-@keyframes flipSettle {
-  0% {
-    filter: drop-shadow(0 0 0 rgba(217, 182, 91, 0));
-  }
-  50% {
-    filter: drop-shadow(0 0 32px rgba(217, 182, 91, 0.22));
-  }
-  100% {
-    filter: drop-shadow(0 0 0 rgba(217, 182, 91, 0));
-  }
-}
-
-@keyframes cardShine {
-  0% {
-    left: -55%;
-    opacity: 0;
-  }
-  20% {
-    opacity: 1;
-  }
-  100% {
-    left: 115%;
-    opacity: 0;
-  }
-}
-
-@keyframes frontGlow {
-  0% {
-    box-shadow: var(--shadow);
-  }
-  45% {
-    box-shadow: var(--shadow), 0 0 44px rgba(217, 182, 91, 0.2);
-  }
-  100% {
-    box-shadow: var(--shadow);
-  }
-}
-
 @keyframes dealCard {
   0% {
     opacity: 0;
@@ -967,13 +924,25 @@ textarea {
 }
 
 @media (max-width: 620px) {
+  :root {
+    --space-3: 14px;
+    --space-4: 18px;
+    --space-5: 24px;
+  }
+
   .app-shell {
-    padding: 12px;
+    padding: var(--space-2);
+  }
+
+  .topbar {
+    min-height: 62px;
+    margin-bottom: var(--space-3);
   }
 
   .hero {
     align-content: start;
-    padding-top: 20px;
+    padding-top: var(--space-2);
+    gap: var(--space-3);
   }
 
   .hero-head {
@@ -1029,5 +998,17 @@ textarea {
 
   .actions .button {
     flex: 1 1 100%;
+  }
+
+  .flip-card {
+    min-height: min(68vh, 500px);
+  }
+
+  .flip-face {
+    padding: 22px;
+  }
+
+  .status-row {
+    align-items: flex-start;
   }
 }

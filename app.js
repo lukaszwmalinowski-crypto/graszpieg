@@ -420,6 +420,7 @@ function startGame(options = {}) {
       const saved = (preferences.names[index] || "").trim();
       return { name: saved || `Gracz ${index + 1}`, checked: false };
     });
+  const previousSpyName = samePlayers ? game.players[game.spyIndex]?.name : "";
   const places = samePlayers && game.placePool?.length ? game.placePool : getPlaces();
   if (players.length < 3) return showToast("Potrzeba minimum 3 graczy.");
   if (!samePlayers && !getSelectedPlaceSets().length) return showToast("Wybierz przynajmniej jedną kategorię miejsc.");
@@ -429,7 +430,7 @@ function startGame(options = {}) {
     players,
     place: draw(places),
     placePool: places,
-    spyIndex: Math.floor(Math.random() * players.length),
+    spyIndex: drawSpyIndex(players, previousSpyName),
     currentRevealIndex: null,
     roundSeconds: Number(preferences.roundMinutes) * 60,
     remainingSeconds: Number(preferences.roundMinutes) * 60,
@@ -540,8 +541,7 @@ function renderReveal() {
   document.querySelector('[data-action="flip-role"]')?.addEventListener("click", () => {
     const flipCard = document.querySelector(".flip-card");
     game.revealFlipped = true;
-    flipCard?.classList.add("is-flipped", "just-flipped");
-    window.setTimeout(() => flipCard?.classList.remove("just-flipped"), 900);
+    flipCard?.classList.add("is-flipped");
   });
   document.querySelector('[data-action="hide-role"]').addEventListener("click", () => {
     game.players[game.currentRevealIndex].checked = true;
@@ -789,6 +789,15 @@ function getRoundProgress() {
 
 function draw(items) {
   return items[Math.floor(Math.random() * items.length)];
+}
+
+function drawSpyIndex(players, previousSpyName = "") {
+  const availableIndexes = players
+    .map((player, index) => ({ player, index }))
+    .filter(({ player }) => player.name !== previousSpyName)
+    .map(({ index }) => index);
+  const pool = availableIndexes.length ? availableIndexes : players.map((_, index) => index);
+  return draw(pool);
 }
 
 function shuffle(items) {
