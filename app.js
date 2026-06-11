@@ -127,7 +127,8 @@ const DEFAULTS = {
   playerCount: 4,
   names: [],
   roundMinutes: 5,
-  placeSet: "classic"
+  placeSet: "classic",
+  placeSets: ["classic"]
 };
 const LEGACY_SAMPLE_NAMES = ["Ania", "Bartek", "Celina", "Darek"];
 
@@ -143,6 +144,9 @@ function loadPreferences() {
     const saved = JSON.parse(localStorage.getItem("szpieg-preferences")) || {};
     if (LEGACY_SAMPLE_NAMES.every((name, index) => saved.names?.[index] === name)) {
       saved.names = [];
+    }
+    if (!Array.isArray(saved.placeSets) && saved.placeSet) {
+      saved.placeSets = saved.placeSet === "all" ? Object.keys(PLACE_SETS) : [saved.placeSet];
     }
     return { ...DEFAULTS, ...saved };
   } catch {
@@ -197,6 +201,7 @@ function render() {
     reveal: renderReveal,
     round: renderRound,
     vote: renderVote,
+    spyGuess: renderSpyGuess,
     result: renderResult
   };
   screens[view]();
@@ -206,9 +211,12 @@ function renderHome() {
   screenTitle.textContent = "Szpieg";
   app.innerHTML = html`
     <section class="screen active hero">
-      <div>
-        <h2 class="hero-title">Szpieg</h2>
-        <p class="subtitle">Gra dedukcyjna na pytania, blef i uważne słuchanie</p>
+      <div class="hero-head">
+        <img class="hero-icon" src="./icons/icon-192.png" alt="">
+        <div>
+          <h2 class="hero-title">Szpieg</h2>
+          <p class="subtitle">Gra dedukcyjna na pytania, blef i uważne słuchanie</p>
+        </div>
       </div>
       <ul class="rule-list">
         <li>Wszyscy gracze poza szpiegiem poznają to samo miejsce.</li>
@@ -258,6 +266,7 @@ function renderHelp() {
 function renderSettings() {
   screenTitle.textContent = "Ustawienia gry";
   const count = clamp(Number(preferences.playerCount) || 4, 3, 12);
+  const selectedSets = getSelectedPlaceSets();
   const names = getDefaultNames(count);
   (preferences.names || []).forEach((name, index) => {
     if (index < count && name.trim()) names[index] = name.trim();
@@ -281,15 +290,26 @@ function renderSettings() {
             ${[3, 5, 7, 10].map((minutes) => `<button class="${preferences.roundMinutes === minutes ? "active" : ""}" data-minutes="${minutes}" type="button">${minutes} min</button>`).join("")}
           </div>
         </div>
-        <label class="field">
-          <span>Zestaw miejsc</span>
-          <select id="placeSet">
-            ${Object.entries(PLACE_SETS).map(([key, set]) => `<option value="${key}" ${preferences.placeSet === key ? "selected" : ""}>${escapeHtml(set.label)}</option>`).join("")}
-            <option value="all" ${preferences.placeSet === "all" ? "selected" : ""}>Wszystkie miejsca</option>
-            <option value="custom" ${preferences.placeSet === "custom" ? "selected" : ""}>Własna lista</option>
-          </select>
-        </label>
-        <label class="field ${preferences.placeSet === "custom" ? "" : "hidden"}" id="customPlacesWrap">
+        <div class="field">
+          <span>Kategorie miejsc</span>
+          <div class="mini-actions">
+            <button class="button secondary compact" data-action="all-sets" type="button">Zaznacz wszystkie</button>
+            <button class="button secondary compact" data-action="classic-set" type="button">Tylko klasyczne</button>
+          </div>
+          <div class="check-grid" id="placeSets">
+            ${Object.entries(PLACE_SETS).map(([key, set]) => `
+              <label class="check-card">
+                <input type="checkbox" data-place-set="${key}" ${selectedSets.includes(key) ? "checked" : ""}>
+                <span>${escapeHtml(set.label)}</span>
+              </label>
+            `).join("")}
+            <label class="check-card">
+              <input type="checkbox" id="customPlacesEnabled" ${selectedSets.includes("custom") ? "checked" : ""}>
+              <span>Własna lista</span>
+            </label>
+          </div>
+        </div>
+        <label class="field ${selectedSets.includes("custom") ? "" : "hidden"}" id="customPlacesWrap">
           <span>Własna lista miejsc, każde w osobnej linii</span>
           <textarea id="customPlaces" placeholder="minimum 10 miejsc">${escapeHtml(preferences.customPlaces || "")}</textarea>
         </label>
@@ -310,7 +330,6 @@ function renderSettings() {
 
 function bindSettingsEvents() {
   const playerCount = document.querySelector("#playerCount");
-  const placeSet = document.querySelector("#placeSet");
   const customPlaces = document.querySelector("#customPlaces");
 
   playerCount.addEventListener("change", () => {
@@ -320,15 +339,18 @@ function bindSettingsEvents() {
   });
   document.querySelectorAll("#timeOptions button").forEach((button) => {
     button.addEventListener("click", () => {
+      saveCurrentSettings();
       savePreferences({ roundMinutes: Number(button.dataset.minutes) });
       renderSettings();
     });
   });
-  placeSet.addEventListener("change", () => {
-    saveCurrentSettings();
-    savePreferences({ placeSet: placeSet.value });
-    renderSettings();
+  document.querySelectorAll("[data-place-set], #customPlacesEnabled").forEach((input) => {
+    input.addEventListener("change", () => {
+      saveCurrentSettings();
+      renderSettings();
+    });
   });
+  bindCategoryQuickActions();
   if (customPlaces) customPlaces.addEventListener("input", saveCurrentSettings);
   document.querySelectorAll("[data-name-index]").forEach((input) => {
     input.addEventListener("input", saveCurrentSettings);
@@ -336,12 +358,45 @@ function bindSettingsEvents() {
   document.querySelector('[data-action="draw"]').addEventListener("click", startGame);
 }
 
+function getSelectedPlaceSets() {
+  if (Array.isArray(preferences.placeSets)) {
+    return preferences.placeSets.filter((key) => key === "custom" || PLACE_SETS[key]);
+  }
+  if (preferences.placeSet === "all") return Object.keys(PLACE_SETS);
+  if (preferences.placeSet === "custom") return ["custom"];
+  return [preferences.placeSet || "classic"].filter((key) => PLACE_SETS[key]);
+}
+
+function readSelectedPlaceSetsFromForm() {
+  const builtIn = [...document.querySelectorAll("[data-place-set]:checked")].map((input) => input.dataset.placeSet);
+  const custom = document.querySelector("#customPlacesEnabled")?.checked ? ["custom"] : [];
+  return [...builtIn, ...custom];
+}
+
+function selectAllPlaceSets() {
+  const allSets = Object.keys(PLACE_SETS);
+  savePreferences({ placeSets: allSets, placeSet: "all" });
+  renderSettings();
+}
+
+function bindCategoryQuickActions() {
+  document.querySelector('[data-action="all-sets"]')?.addEventListener("click", selectAllPlaceSets);
+  document.querySelector('[data-action="classic-set"]')?.addEventListener("click", () => {
+    saveCurrentSettings();
+    savePreferences({ placeSets: ["classic"], placeSet: "classic" });
+    renderSettings();
+  });
+}
+
 function saveCurrentSettings() {
   const names = [...document.querySelectorAll("[data-name-index]")].map((input) => input.value.trim());
   const customPlaces = document.querySelector("#customPlaces");
+  const placeSets = readSelectedPlaceSetsFromForm();
+  const placeSet = placeSets.length === Object.keys(PLACE_SETS).length ? "all" : placeSets[0] || "";
   savePreferences({
     playerCount: clamp(Number(document.querySelector("#playerCount")?.value) || 3, 3, 12),
-    placeSet: document.querySelector("#placeSet")?.value || preferences.placeSet,
+    placeSet,
+    placeSets,
     names,
     customPlaces: customPlaces?.value || preferences.customPlaces || ""
   });
@@ -356,30 +411,34 @@ function startGame() {
   });
   const places = getPlaces();
   if (players.length < 3) return showToast("Potrzeba minimum 3 graczy.");
-  if (places.length < 10) return showToast("Własna lista musi mieć minimum 10 miejsc.");
+  if (!getSelectedPlaceSets().length) return showToast("Wybierz przynajmniej jedną kategorię miejsc.");
+  if (places.length < 10) return showToast("Wybrane miejsca muszą mieć łącznie minimum 10 haseł.");
 
   game = {
     players,
     place: draw(places),
+    placePool: places,
     spyIndex: Math.floor(Math.random() * players.length),
     currentRevealIndex: null,
     roundSeconds: Number(preferences.roundMinutes) * 60,
     remainingSeconds: Number(preferences.roundMinutes) * 60,
     paused: true,
     selectedVote: null,
+    spyGuess: "",
     question: ""
   };
   setView("cards");
 }
 
 function getPlaces() {
-  if (preferences.placeSet === "custom") {
-    return unique((preferences.customPlaces || "").split("\n").map((place) => place.trim()).filter(Boolean));
-  }
-  if (preferences.placeSet === "all") {
-    return unique(Object.values(PLACE_SETS).flatMap((set) => set.places));
-  }
-  return unique(PLACE_SETS[preferences.placeSet]?.places || PLACE_SETS.classic.places);
+  const selectedSets = getSelectedPlaceSets();
+  const builtInPlaces = selectedSets
+    .filter((key) => PLACE_SETS[key])
+    .flatMap((key) => PLACE_SETS[key].places);
+  const customPlaces = selectedSets.includes("custom")
+    ? (preferences.customPlaces || "").split("\n").map((place) => place.trim()).filter(Boolean)
+    : [];
+  return unique([...builtInPlaces, ...customPlaces]);
 }
 
 function renderCards() {
@@ -520,24 +579,85 @@ function renderVote() {
   document.querySelectorAll("[data-vote]").forEach((button) => {
     button.addEventListener("click", () => {
       game.selectedVote = Number(button.dataset.vote);
-      setView("result");
+      if (game.selectedVote === game.spyIndex) {
+        game.spyGuess = "";
+        setView("result");
+      } else {
+        setView("spyGuess");
+      }
     });
+  });
+}
+
+function renderSpyGuess() {
+  if (!game || game.selectedVote === null) return setView("vote", false);
+  screenTitle.textContent = "Szpieg zgaduje";
+  const suggestions = buildPlaceSuggestions();
+  app.innerHTML = html`
+    <section class="screen active panel">
+      <p class="kicker">ostatnia szansa</p>
+      <h2>Szpieg próbuje odgadnąć miejsce</h2>
+      <p class="subtitle">Gracze wskazali złą osobę. Teraz szpieg może wygrać dodatkowo, jeśli trafi prawdziwą lokalizację.</p>
+      <label class="field">
+        <span>Typ szpiega</span>
+        <input id="spyGuessInput" list="placeSuggestions" value="${escapeHtml(game.spyGuess)}" placeholder="Wpisz lub wybierz miejsce">
+        <datalist id="placeSuggestions">
+          ${suggestions.map((place) => `<option value="${escapeHtml(place)}"></option>`).join("")}
+        </datalist>
+      </label>
+      <div class="actions">
+        <button class="button" data-action="submit-spy-guess" type="button">Sprawdź typ</button>
+        <button class="button secondary" data-action="skip-spy-guess" type="button">Pomiń zgadywanie</button>
+      </div>
+    </section>
+  `;
+  const input = document.querySelector("#spyGuessInput");
+  input.addEventListener("input", () => {
+    game.spyGuess = input.value.trim();
+  });
+  document.querySelector('[data-action="submit-spy-guess"]').addEventListener("click", () => {
+    game.spyGuess = input.value.trim();
+    if (!game.spyGuess) return showToast("Wpisz typ szpiega albo pomiń zgadywanie.");
+    setView("result");
+  });
+  document.querySelector('[data-action="skip-spy-guess"]').addEventListener("click", () => {
+    game.spyGuess = "";
+    setView("result");
   });
 }
 
 function renderResult() {
   if (!game || game.selectedVote === null) return setView("vote", false);
-  const playersWin = game.selectedVote === game.spyIndex;
+  const foundSpy = game.selectedVote === game.spyIndex;
+  const spyGuessedPlace = !foundSpy && normalizeGuess(game.spyGuess) === normalizeGuess(game.place);
+  const playersWin = foundSpy && !spyGuessedPlace;
   const spy = game.players[game.spyIndex].name;
+  const voted = game.players[game.selectedVote].name;
+  const resultText = getResultText(foundSpy, spyGuessedPlace);
   screenTitle.textContent = "Podsumowanie";
   app.innerHTML = html`
     <section class="screen active panel result ${playersWin ? "" : "spy-win"}">
-      <h2>${playersWin ? "Wygrywają gracze" : "Wygrywa szpieg"}</h2>
-      <p class="subtitle">${playersWin ? "Wskazaliście właściwą osobę." : "Wskazaliście złą osobę."}</p>
-      <ul class="help-list">
-        <li>Szpiegiem był/a: <strong>${escapeHtml(spy)}</strong></li>
-        <li>Miejsce: <strong>${escapeHtml(game.place)}</strong></li>
-      </ul>
+      <p class="kicker">${playersWin ? "gracze wygrywają" : "szpieg wygrywa"}</p>
+      <h2>${resultText.title}</h2>
+      <p class="subtitle">${resultText.subtitle}</p>
+      <div class="summary-grid">
+        <div class="summary-tile">
+          <span>Wasz typ</span>
+          <strong>${escapeHtml(voted)}</strong>
+        </div>
+        <div class="summary-tile">
+          <span>Szpieg</span>
+          <strong>${escapeHtml(spy)}</strong>
+        </div>
+        <div class="summary-tile">
+          <span>Miejsce</span>
+          <strong>${escapeHtml(game.place)}</strong>
+        </div>
+        <div class="summary-tile">
+          <span>Typ szpiega</span>
+          <strong>${game.spyGuess ? escapeHtml(game.spyGuess) : "brak"}</strong>
+        </div>
+      </div>
       <div class="actions">
         <button class="button" data-action="same-players" type="button">Nowa gra z tymi samymi graczami</button>
         <button class="button secondary" data-action="fresh" type="button">Nowa gra od początku</button>
@@ -550,6 +670,30 @@ function renderResult() {
     historyStack = [];
     setView("home", false);
   });
+}
+
+function buildPlaceSuggestions() {
+  const pool = game?.placePool?.length ? game.placePool : getPlaces();
+  return unique([game.place, ...shuffle(pool).slice(0, 36)]).sort((a, b) => a.localeCompare(b, "pl"));
+}
+
+function getResultText(foundSpy, spyGuessedPlace) {
+  if (foundSpy) {
+    return {
+      title: "Wygrywają gracze",
+      subtitle: "Wskazaliście prawdziwego szpiega, zanim zdążył przejąć rundę."
+    };
+  }
+  if (spyGuessedPlace) {
+    return {
+      title: "Szpieg trafia miejsce",
+      subtitle: "Wskazaliście złą osobę, a szpieg poprawnie odgadł lokalizację."
+    };
+  }
+  return {
+    title: "Wygrywa szpieg",
+    subtitle: "Wskazaliście złą osobę. Szpieg nie trafił miejsca, ale przetrwał głosowanie."
+  };
 }
 
 function copyRules() {
@@ -583,8 +727,21 @@ function draw(items) {
   return items[Math.floor(Math.random() * items.length)];
 }
 
+function shuffle(items) {
+  return [...items].sort(() => Math.random() - 0.5);
+}
+
 function unique(items) {
   return [...new Set(items.map((item) => item.trim()).filter(Boolean))];
+}
+
+function normalizeGuess(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ");
 }
 
 function clamp(value, min, max) {

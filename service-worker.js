@@ -1,4 +1,4 @@
-const CACHE_NAME = "szpieg-v3";
+const CACHE_NAME = "szpieg-v6";
 const FILES_TO_CACHE = [
   "./",
   "./index.html",
@@ -6,7 +6,10 @@ const FILES_TO_CACHE = [
   "./app.js",
   "./places.js",
   "./manifest.json",
-  "./icons/icon.svg"
+  "./icons/icon.svg",
+  "./icons/icon-192.png",
+  "./icons/icon-512.png",
+  "./icons/icon-1024.png"
 ];
 
 self.addEventListener("install", (event) => {
