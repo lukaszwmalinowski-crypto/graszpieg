@@ -197,6 +197,7 @@ function render() {
     home: renderHome,
     help: renderHelp,
     settings: renderSettings,
+    deal: renderDeal,
     cards: renderCards,
     reveal: renderReveal,
     round: renderRound,
@@ -226,15 +227,21 @@ function renderHome() {
       <div class="actions">
         <button class="button" data-action="new-game" type="button">Nowa gra</button>
         <button class="button secondary" data-action="help" type="button">Jak grać?</button>
-        <button class="button secondary hidden" data-action="install" type="button" id="installButton">Zainstaluj aplikację</button>
+      </div>
+      <div class="install-panel ${deferredInstallPrompt ? "" : "hidden"}" id="installPanel">
+        <img src="./icons/icon-192.png" alt="">
+        <div>
+          <strong>Zainstaluj Szpiega</strong>
+          <span>Dodaj grę do ekranu telefonu i uruchamiaj ją jak aplikację.</span>
+        </div>
+        <button class="button compact" data-action="install" type="button" id="installButton">Instaluj</button>
       </div>
     </section>
   `;
   document.querySelector('[data-action="new-game"]').addEventListener("click", () => setView("settings"));
   document.querySelector('[data-action="help"]').addEventListener("click", () => setView("help"));
   const installButton = document.querySelector("#installButton");
-  if (deferredInstallPrompt) installButton.classList.remove("hidden");
-  installButton.addEventListener("click", installApp);
+  if (installButton) installButton.addEventListener("click", installApp);
 }
 
 function renderHelp() {
@@ -389,6 +396,7 @@ function bindCategoryQuickActions() {
 }
 
 function saveCurrentSettings() {
+  if (!document.querySelector("#playerCount")) return;
   const names = [...document.querySelectorAll("[data-name-index]")].map((input) => input.value.trim());
   const customPlaces = document.querySelector("#customPlaces");
   const placeSets = readSelectedPlaceSetsFromForm();
@@ -402,16 +410,19 @@ function saveCurrentSettings() {
   });
 }
 
-function startGame() {
-  saveCurrentSettings();
-  const playerCount = clamp(Number(preferences.playerCount) || 3, 3, 12);
-  const players = Array.from({ length: playerCount }, (_, index) => {
-    const saved = (preferences.names[index] || "").trim();
-    return { name: saved || `Gracz ${index + 1}`, checked: false };
-  });
-  const places = getPlaces();
+function startGame(options = {}) {
+  if (!options.keepPreferences) saveCurrentSettings();
+  const samePlayers = options.keepPreferences && game?.players?.length;
+  const playerCount = samePlayers ? game.players.length : clamp(Number(preferences.playerCount) || 3, 3, 12);
+  const players = samePlayers
+    ? game.players.map((player) => ({ name: player.name, checked: false }))
+    : Array.from({ length: playerCount }, (_, index) => {
+      const saved = (preferences.names[index] || "").trim();
+      return { name: saved || `Gracz ${index + 1}`, checked: false };
+    });
+  const places = samePlayers && game.placePool?.length ? game.placePool : getPlaces();
   if (players.length < 3) return showToast("Potrzeba minimum 3 graczy.");
-  if (!getSelectedPlaceSets().length) return showToast("Wybierz przynajmniej jedną kategorię miejsc.");
+  if (!samePlayers && !getSelectedPlaceSets().length) return showToast("Wybierz przynajmniej jedną kategorię miejsc.");
   if (places.length < 10) return showToast("Wybrane miejsca muszą mieć łącznie minimum 10 haseł.");
 
   game = {
@@ -425,9 +436,28 @@ function startGame() {
     paused: true,
     selectedVote: null,
     spyGuess: "",
+    revealFlipped: false,
     question: ""
   };
-  setView("cards");
+  setView("deal");
+}
+
+function renderDeal() {
+  if (!game) return setView("settings", false);
+  screenTitle.textContent = "Tasowanie";
+  app.innerHTML = html`
+    <section class="screen active deal-screen">
+      <div class="deal-table" aria-hidden="true">
+        ${game.players.map((_, index) => `<span class="deal-card" style="--i:${index}"></span>`).join("")}
+      </div>
+      <p class="kicker">role wylosowane</p>
+      <h2>Tasuję i rozdaję karty</h2>
+      <p class="subtitle">Za chwilę każdy gracz sprawdzi swoją zakrytą kartę.</p>
+    </section>
+  `;
+  window.setTimeout(() => {
+    if (view === "deal") setView("cards", false);
+  }, 1150);
 }
 
 function getPlaces() {
@@ -467,6 +497,7 @@ function renderCards() {
   document.querySelectorAll("[data-player]").forEach((card) => {
     card.addEventListener("click", () => {
       game.currentRevealIndex = Number(card.dataset.player);
+      game.revealFlipped = false;
       setView("reveal");
     });
   });
@@ -483,25 +514,39 @@ function renderReveal() {
   screenTitle.textContent = player.name;
   app.innerHTML = html`
     <section class="screen active">
-      <div class="role-card">
-        <div>
-          <p class="role-name">${escapeHtml(player.name)}</p>
-          ${isSpy ? `
-            <h2 class="spy-name">JESTEŚ SZPIEGIEM</h2>
-            <p class="subtitle">Słuchaj pytań i spróbuj odgadnąć miejsce.</p>
-          ` : `
-            <p class="subtitle">Twoje miejsce to:</p>
-            <h2 class="place-name">${escapeHtml(game.place)}</h2>
-            <p class="subtitle">Zapamiętaj miejsce i nie pokazuj karty innym.</p>
-          `}
-          <button class="button" data-action="hide-role" type="button">Ukryj i przekaż dalej</button>
+      <div class="flip-stage">
+        <div class="flip-card ${isSpy ? "spy-card" : "place-card"} ${game.revealFlipped ? "is-flipped" : ""}">
+          <button class="flip-face flip-back" data-action="flip-role" type="button" aria-label="Odkryj rolę">
+            <span class="card-mark">♠</span>
+            <strong>${escapeHtml(player.name)}</strong>
+            <span>Kliknij kartę, aby zobaczyć rolę</span>
+          </button>
+          <div class="flip-face flip-front">
+            <p class="role-name">${escapeHtml(player.name)}</p>
+            ${isSpy ? `
+              <h2 class="spy-name"><span>JESTEŚ</span><span>SZPIEGIEM</span></h2>
+              <p class="subtitle">Słuchaj pytań i spróbuj odgadnąć miejsce.</p>
+            ` : `
+              <p class="subtitle">Twoje miejsce to:</p>
+              <h2 class="place-name">${escapeHtml(game.place)}</h2>
+              <p class="subtitle">Zapamiętaj miejsce i nie pokazuj karty innym.</p>
+            `}
+            <button class="button" data-action="hide-role" type="button">Ukryj i przekaż dalej</button>
+          </div>
         </div>
       </div>
     </section>
   `;
+  document.querySelector('[data-action="flip-role"]')?.addEventListener("click", () => {
+    const flipCard = document.querySelector(".flip-card");
+    game.revealFlipped = true;
+    flipCard?.classList.add("is-flipped", "just-flipped");
+    window.setTimeout(() => flipCard?.classList.remove("just-flipped"), 900);
+  });
   document.querySelector('[data-action="hide-role"]').addEventListener("click", () => {
     game.players[game.currentRevealIndex].checked = true;
     game.currentRevealIndex = null;
+    game.revealFlipped = false;
     setView("cards");
   });
 }
@@ -509,12 +554,24 @@ function renderReveal() {
 function renderRound() {
   if (!game) return setView("settings", false);
   screenTitle.textContent = "Runda";
+  const progress = getRoundProgress();
   app.innerHTML = html`
     <section class="screen active panel">
       <h2>Runda rozpoczęta</h2>
-      <div class="timer" id="timer">${formatTime(game.remainingSeconds)}</div>
+      <div class="round-layout">
+        <div class="timer-ring" style="--progress:${progress}">
+          <div>
+            <span class="timer" id="timer">${formatTime(game.remainingSeconds)}</span>
+            <small>${game.paused ? "pauza" : "czas rundy"}</small>
+          </div>
+        </div>
+        <div class="question-card">
+          <span class="card-mark">?</span>
+          <strong>Pytanie pomocnicze</strong>
+          <p>${game.question ? escapeHtml(game.question) : "Wylosuj pytanie pomocnicze, jeśli rozmowa potrzebuje iskry."}</p>
+        </div>
+      </div>
       <p class="tip-box">Zadawajcie sobie pytania. Odpowiedzi muszą być konkretne, ale nie mogą zbyt łatwo zdradzić miejsca.</p>
-      <div class="question-box">${game.question ? escapeHtml(game.question) : "Wylosuj pytanie pomocnicze, jeśli rozmowa potrzebuje iskry."}</div>
       <div class="actions">
         <button class="button secondary" data-action="pause" ${game.paused ? "disabled" : ""} type="button">Pauza</button>
         <button class="button secondary" data-action="resume" ${game.paused ? "" : "disabled"} type="button">Wznów</button>
@@ -547,6 +604,8 @@ function startTimer() {
     game.remainingSeconds = Math.max(0, game.remainingSeconds - 1);
     const timer = document.querySelector("#timer");
     if (timer) timer.textContent = formatTime(game.remainingSeconds);
+    const ring = document.querySelector(".timer-ring");
+    if (ring) ring.style.setProperty("--progress", getRoundProgress());
     if (game.remainingSeconds === 0) {
       clearInterval(timerId);
       game.paused = true;
@@ -664,7 +723,7 @@ function renderResult() {
       </div>
     </section>
   `;
-  document.querySelector('[data-action="same-players"]').addEventListener("click", startGame);
+  document.querySelector('[data-action="same-players"]').addEventListener("click", () => startGame({ keepPreferences: true }));
   document.querySelector('[data-action="fresh"]').addEventListener("click", () => {
     game = null;
     historyStack = [];
@@ -721,6 +780,11 @@ function formatTime(totalSeconds) {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
+function getRoundProgress() {
+  if (!game?.roundSeconds) return 0;
+  return Math.round((game.remainingSeconds / game.roundSeconds) * 100);
 }
 
 function draw(items) {

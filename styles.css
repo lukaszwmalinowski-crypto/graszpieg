@@ -195,6 +195,42 @@ h3 {
   align-items: center;
 }
 
+.install-panel {
+  display: grid;
+  grid-template-columns: 54px 1fr auto;
+  gap: 14px;
+  align-items: center;
+  border: 1px solid rgba(217, 182, 91, 0.28);
+  border-radius: 8px;
+  padding: 12px;
+  background:
+    linear-gradient(135deg, rgba(217, 182, 91, 0.12), transparent 55%),
+    rgba(255, 255, 255, 0.045);
+  box-shadow: var(--shadow-tight);
+}
+
+.install-panel img {
+  width: 54px;
+  height: 54px;
+  border-radius: 8px;
+}
+
+.install-panel strong,
+.install-panel span {
+  display: block;
+  font-family: system-ui, sans-serif;
+}
+
+.install-panel strong {
+  margin-bottom: 4px;
+  color: var(--gold-soft);
+}
+
+.install-panel span {
+  color: var(--muted);
+  line-height: 1.35;
+}
+
 .button {
   min-height: 48px;
   border: 1px solid var(--line);
@@ -444,6 +480,207 @@ textarea {
   font-family: system-ui, sans-serif;
 }
 
+.deal-screen {
+  display: grid;
+  min-height: calc(100vh - 140px);
+  place-items: center;
+  text-align: center;
+}
+
+.deal-table {
+  position: relative;
+  width: min(72vw, 360px);
+  height: 240px;
+  margin-bottom: 24px;
+}
+
+.deal-card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 108px;
+  height: 154px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(145deg, rgba(217, 182, 91, 0.22), transparent 46%),
+    var(--texture),
+    #172031;
+  box-shadow: var(--shadow-tight);
+  transform: translate(-50%, -50%) rotate(0deg);
+  animation: dealCard 1050ms cubic-bezier(.2, .8, .2, 1) both;
+  animation-delay: calc(var(--i) * 70ms);
+}
+
+.deal-card::before {
+  position: absolute;
+  inset: 12px;
+  border: 1px solid rgba(217, 182, 91, 0.25);
+  border-radius: 6px;
+  content: "";
+}
+
+.deal-card::after {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  color: rgba(240, 216, 139, 0.75);
+  content: "♠";
+  font-size: 2rem;
+  transform: translate(-50%, -50%);
+}
+
+.flip-stage {
+  position: relative;
+  display: grid;
+  min-height: calc(100vh - 150px);
+  place-items: center;
+  perspective: 1300px;
+  overflow: hidden;
+}
+
+.flip-stage::before {
+  position: absolute;
+  inset: 8% 4%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(217, 182, 91, 0.16), transparent 58%);
+  content: "";
+  filter: blur(10px);
+  opacity: 0.65;
+  pointer-events: none;
+  transform: translateY(24px);
+}
+
+.flip-card {
+  position: relative;
+  width: min(92vw, 560px);
+  min-height: min(66vh, 560px);
+  transform-style: preserve-3d;
+  animation: cardEnter 420ms cubic-bezier(.2, .8, .2, 1) both;
+  z-index: 1;
+}
+
+.flip-card.is-flipped {
+  transform: none;
+}
+
+.flip-card.just-flipped {
+  animation: flipSettle 820ms cubic-bezier(.18, .82, .24, 1) both;
+}
+
+.flip-card.is-flipped .flip-back {
+  opacity: 0;
+  pointer-events: none;
+  transform: rotateY(180deg) scale(0.98);
+}
+
+.flip-face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  padding: clamp(24px, 8vw, 56px);
+  background:
+    radial-gradient(circle at center, rgba(217, 182, 91, 0.15), transparent 50%),
+    var(--texture),
+    linear-gradient(150deg, #181f2f, #241723);
+  box-shadow: var(--shadow);
+  text-align: center;
+  backface-visibility: hidden;
+  overflow: hidden;
+  transition: transform 760ms cubic-bezier(.18, .82, .24, 1), opacity 260ms ease;
+}
+
+.flip-face::before {
+  position: absolute;
+  inset: 16px;
+  border: 1px solid rgba(217, 182, 91, 0.18);
+  border-radius: 7px;
+  content: "";
+  pointer-events: none;
+}
+
+.flip-face::after {
+  position: absolute;
+  inset: -45% auto -45% -55%;
+  width: 42%;
+  background: linear-gradient(90deg, transparent, rgba(255, 246, 214, 0.34), transparent);
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+  transform: rotate(18deg);
+}
+
+.flip-back {
+  width: 100%;
+  min-height: 100%;
+  color: var(--text);
+  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+}
+
+.flip-back:hover {
+  border-color: rgba(217, 182, 91, 0.55);
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.58), 0 0 34px rgba(217, 182, 91, 0.12);
+  transform: translateY(-4px) rotateX(2deg);
+}
+
+.flip-back strong {
+  display: block;
+  margin: 18px 0 10px;
+  font-size: clamp(2rem, 9vw, 4.8rem);
+  line-height: 1;
+}
+
+.flip-back span:last-child {
+  color: var(--muted);
+  font-family: system-ui, sans-serif;
+}
+
+.card-mark {
+  display: inline-grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  border: 1px solid rgba(217, 182, 91, 0.35);
+  border-radius: 50%;
+  color: var(--gold-soft);
+  font-size: 1.8rem;
+}
+
+.flip-front {
+  opacity: 0;
+  pointer-events: none;
+  transform: rotateY(-180deg) scale(0.98);
+}
+
+.flip-card.is-flipped .flip-front {
+  opacity: 1;
+  pointer-events: auto;
+  transform: rotateY(0) scale(1);
+}
+
+.flip-card.just-flipped .flip-front::after {
+  animation: cardShine 760ms ease 160ms both;
+}
+
+.flip-card.just-flipped .flip-front {
+  animation: frontGlow 820ms ease both;
+}
+
+.flip-card.spy-card .flip-front {
+  border-color: rgba(157, 41, 55, 0.52);
+  background:
+    radial-gradient(circle at center, rgba(157, 41, 55, 0.22), transparent 54%),
+    var(--texture),
+    linear-gradient(150deg, #181f2f, #2b111b);
+}
+
+.flip-card.place-card .flip-front {
+  border-color: rgba(217, 182, 91, 0.42);
+}
+
 .role-card {
   display: grid;
   place-items: center;
@@ -475,8 +712,19 @@ textarea {
 }
 
 .spy-name {
+  display: grid;
+  gap: 4px;
+  justify-items: center;
   color: #ffced4;
+  font-size: clamp(2.45rem, 9vw, 4.55rem);
+  line-height: 0.9;
   text-shadow: 0 0 28px rgba(157, 41, 55, 0.55);
+}
+
+.spy-name span {
+  display: block;
+  width: min-content;
+  max-width: 100%;
 }
 
 .timer {
@@ -489,15 +737,76 @@ textarea {
   color: var(--gold-soft);
 }
 
-.question-box {
-  min-height: 72px;
-  margin: 16px 0;
-  border-left: 4px solid var(--gold);
+.round-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 300px) 1fr;
+  gap: clamp(16px, 4vw, 28px);
+  align-items: center;
+  margin: 20px 0;
+}
+
+.timer-ring {
+  display: grid;
+  width: min(72vw, 300px);
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, #111827 0 58%, transparent 59%),
+    conic-gradient(var(--gold) calc(var(--progress) * 1%), rgba(255, 255, 255, 0.08) 0);
+  box-shadow: var(--shadow-tight);
+}
+
+.timer-ring > div {
+  display: grid;
+  width: 74%;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid var(--line-soft);
+  border-radius: 50%;
+  background:
+    var(--texture),
+    linear-gradient(150deg, rgba(24, 31, 47, 0.96), rgba(36, 23, 35, 0.96));
+}
+
+.timer-ring .timer {
+  margin: 0;
+  font-size: clamp(3rem, 12vw, 5.2rem);
+}
+
+.timer-ring small {
+  margin-top: -34px;
+  color: var(--muted);
+  font-family: system-ui, sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.question-card {
+  min-height: 240px;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.045);
+  padding: clamp(18px, 4vw, 28px);
+  background:
+    linear-gradient(145deg, rgba(217, 182, 91, 0.16), transparent 45%),
+    var(--texture),
+    var(--card-2);
+  box-shadow: var(--shadow-tight);
+}
+
+.question-card strong {
+  display: block;
+  margin: 18px 0 12px;
+  color: var(--gold-soft);
+  font-family: system-ui, sans-serif;
+  text-transform: uppercase;
+}
+
+.question-card p {
+  margin-bottom: 0;
   color: var(--text);
-  font-size: 1.15rem;
+  font-size: clamp(1.25rem, 4vw, 2rem);
+  line-height: 1.25;
 }
 
 .result {
@@ -590,6 +899,73 @@ textarea {
   }
 }
 
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(28px) rotateX(8deg) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotateX(0) scale(1);
+  }
+}
+
+@keyframes flipSettle {
+  0% {
+    filter: drop-shadow(0 0 0 rgba(217, 182, 91, 0));
+  }
+  50% {
+    filter: drop-shadow(0 0 32px rgba(217, 182, 91, 0.22));
+  }
+  100% {
+    filter: drop-shadow(0 0 0 rgba(217, 182, 91, 0));
+  }
+}
+
+@keyframes cardShine {
+  0% {
+    left: -55%;
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    left: 115%;
+    opacity: 0;
+  }
+}
+
+@keyframes frontGlow {
+  0% {
+    box-shadow: var(--shadow);
+  }
+  45% {
+    box-shadow: var(--shadow), 0 0 44px rgba(217, 182, 91, 0.2);
+  }
+  100% {
+    box-shadow: var(--shadow);
+  }
+}
+
+@keyframes dealCard {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(0deg) scale(0.88);
+  }
+  35% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(calc((var(--i) - 2) * 8deg)) scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform:
+      translate(calc(-50% + (var(--i) - 1.5) * 46px), -50%)
+      rotate(calc((var(--i) - 2) * 10deg))
+      scale(1);
+  }
+}
+
 @media (max-width: 620px) {
   .app-shell {
     padding: 12px;
@@ -627,6 +1003,24 @@ textarea {
   .vote-grid,
   .summary-grid {
     grid-template-columns: 1fr;
+  }
+
+  .install-panel {
+    grid-template-columns: 48px 1fr;
+  }
+
+  .install-panel .button {
+    grid-column: 1 / -1;
+  }
+
+  .round-layout {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .question-card {
+    width: 100%;
+    min-height: 190px;
   }
 
   .button {
