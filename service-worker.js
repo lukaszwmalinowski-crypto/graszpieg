@@ -1,4 +1,4 @@
-const CACHE_NAME = "szpieg-v38";
+const CACHE_NAME = "szpieg-v42";
 const FILES_TO_CACHE = [
   "./",
   "./index.html",
@@ -16,6 +16,11 @@ const FILES_TO_CACHE = [
   "./icons/title-screen.png",
   "./icons/title-screen-mobile.png",
   "./icons/help-screen.png",
+  "./icons/help-step-1.png",
+  "./icons/help-step-2.png",
+  "./icons/help-step-3.png",
+  "./icons/help-step-4.png",
+  "./icons/help-step-5.png",
   "./icons/round-screen.png"
 ];
 

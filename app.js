@@ -139,6 +139,7 @@ let game = null;
 let timerId = null;
 let toastTimerId = null;
 let deferredInstallPrompt = null;
+let helpSlideIndex = 0;
 
 function loadPreferences() {
   try {
@@ -243,14 +244,48 @@ function renderHome() {
 
 function renderHelp() {
   screenTitle.textContent = "Jak grać?";
+  const slides = [1, 2, 3, 4, 5].map((number) => `./icons/help-step-${number}.png`);
+  helpSlideIndex = clamp(helpSlideIndex, 0, slides.length - 1);
   app.innerHTML = html`
-    <section class="screen active mission-screen" aria-label="Instrukcja misji">
-      <div class="mission-art">
-        <button class="mission-start" data-action="mission-start" type="button" aria-label="Rozpocznij operację"></button>
+    <section class="screen active mission-card-screen" aria-label="Instrukcja misji">
+      <div class="mission-card-stack" id="missionCardStack" tabindex="0">
+        ${slides.map((src, index) => `
+          <article class="mission-image-card" data-mission-card="${index}" aria-hidden="${index === helpSlideIndex ? "false" : "true"}">
+            <img src="${src}" alt="Instrukcja misji, krok ${index + 1} z 5">
+          </article>
+        `).join("")}
+        <button class="mission-card-hotspot mission-card-prev" data-action="mission-prev" type="button" aria-label="Poprzedni krok"></button>
+        <button class="mission-card-hotspot mission-card-next" data-action="mission-next" type="button" aria-label="Następny krok"></button>
+        <button class="mission-card-hotspot mission-card-start" data-action="mission-start" type="button" aria-label="Rozpocznij operację"></button>
       </div>
     </section>
   `;
+  updateMissionCards();
+  document.querySelector('[data-action="mission-prev"]').addEventListener("click", () => updateMissionCards(helpSlideIndex - 1));
+  document.querySelector('[data-action="mission-next"]').addEventListener("click", () => updateMissionCards(helpSlideIndex + 1));
   document.querySelector('[data-action="mission-start"]').addEventListener("click", () => setView("settings"));
+  document.querySelector("#missionCardStack").addEventListener("keydown", (event) => {
+    if (event.key === "ArrowLeft") updateMissionCards(helpSlideIndex - 1);
+    if (event.key === "ArrowRight") updateMissionCards(helpSlideIndex + 1);
+  });
+}
+
+function updateMissionCards(nextIndex = helpSlideIndex) {
+  const cards = [...document.querySelectorAll("[data-mission-card]")];
+  if (!cards.length) return;
+  helpSlideIndex = clamp(nextIndex, 0, cards.length - 1);
+  cards.forEach((card, index) => {
+    const distance = index - helpSlideIndex;
+    card.classList.toggle("active", distance === 0);
+    card.classList.toggle("past", distance < 0);
+    card.classList.toggle("queued", distance > 0);
+    card.style.setProperty("--distance", Math.min(Math.abs(distance), 4));
+    card.style.setProperty("--direction", Math.sign(distance));
+    card.setAttribute("aria-hidden", distance === 0 ? "false" : "true");
+  });
+  document.querySelector('[data-action="mission-prev"]').disabled = helpSlideIndex === 0;
+  document.querySelector('[data-action="mission-next"]').disabled = helpSlideIndex === cards.length - 1;
+  document.querySelector('[data-action="mission-start"]').classList.toggle("visible", helpSlideIndex === cards.length - 1);
 }
 
 function renderSettings() {
