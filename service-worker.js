@@ -1,4 +1,4 @@
-const CACHE_NAME = "szpieg-v16";
+const CACHE_NAME = "szpieg-v33";
 const FILES_TO_CACHE = [
   "./",
   "./index.html",
@@ -9,7 +9,11 @@ const FILES_TO_CACHE = [
   "./icons/icon.svg",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
-  "./icons/icon-1024.png"
+  "./icons/icon-1024.png",
+  "./icons/player-card-art.png",
+  "./icons/cards-table-bg.jpeg",
+  "./icons/dossier-bg.png",
+  "./icons/title-screen.png"
 ];
 
 self.addEventListener("install", (event) => {
@@ -30,8 +34,22 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put("./index.html", copy));
+          return response;
+        })
+        .catch(() => caches.match("./index.html"))
+    );
+    return;
+  }
+
   event.respondWith(
-    caches.match(event.request).then((cached) => {
+    caches.match(event.request, { ignoreSearch: true }).then((cached) => {
       return cached || fetch(event.request).then((response) => {
         const copy = response.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));

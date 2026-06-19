@@ -4,6 +4,8 @@
 
 Gra pozwala wybrać kilka kategorii miejsc naraz, dodać własną listę miejsc, przeprowadzić głosowanie oraz dać szpiegowi ostatnią szansę na odgadnięcie lokalizacji.
 
+Obecna wersja ma graficzny klimat tajnych akt: planszę tytułową, dossier ustawień, karty graczy i tła stołu detektywistycznego.
+
 ## Uruchomienie lokalne
 
 Najprościej otworzyć plik `index.html` w przeglądarce. Dla pełnego testu PWA i service workera uruchom lokalny serwer w folderze projektu, na przykład:
@@ -41,6 +43,10 @@ icons/icon.svg
 icons/icon-192.png
 icons/icon-512.png
 icons/icon-1024.png
+icons/title-screen.png
+icons/player-card-art.png
+icons/cards-table-bg.jpeg
+icons/dossier-bg.png
 README.md
 ```
 

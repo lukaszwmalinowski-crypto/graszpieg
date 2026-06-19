@@ -137,6 +137,7 @@ let historyStack = [];
 let preferences = loadPreferences();
 let game = null;
 let timerId = null;
+let toastTimerId = null;
 let deferredInstallPrompt = null;
 
 function loadPreferences() {
@@ -160,14 +161,21 @@ function savePreferences(next) {
 }
 
 function showToast(message) {
+  clearTimeout(toastTimerId);
   toast.textContent = message;
   toast.classList.add("show");
-  window.setTimeout(() => toast.classList.remove("show"), 2300);
+  toastTimerId = window.setTimeout(() => toast.classList.remove("show"), 2300);
+}
+
+function clearToast() {
+  clearTimeout(toastTimerId);
+  toast.classList.remove("show");
 }
 
 function setView(nextView, push = true) {
   if (push && view !== nextView) historyStack.push(view);
   view = nextView;
+  clearToast();
   render();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -192,6 +200,7 @@ function escapeHtml(value) {
 
 function render() {
   stopTimerIfNeeded();
+  document.body.dataset.view = view;
   backButton.classList.toggle("hidden", view === "home");
   const screens = {
     home: renderHome,
@@ -211,23 +220,9 @@ function render() {
 function renderHome() {
   screenTitle.textContent = "Szpieg";
   app.innerHTML = html`
-    <section class="screen active hero">
-      <div class="hero-head">
-        <img class="hero-icon" src="./icons/icon-192.png" alt="">
-        <div>
-          <h2 class="hero-title">Szpieg</h2>
-          <p class="subtitle">Gra dedukcyjna na pytania, blef i uważne słuchanie</p>
-        </div>
-      </div>
-      <ul class="rule-list">
-        <li>Wszyscy gracze poza szpiegiem poznają to samo miejsce.</li>
-        <li>Zadawajcie sobie pytania, żeby odkryć, kto nie zna miejsca.</li>
-        <li>Szpieg słucha odpowiedzi i próbuje odgadnąć lokalizację.</li>
-      </ul>
-      <div class="actions">
-        <button class="button" data-action="new-game" type="button">Nowa gra</button>
-        <button class="button secondary" data-action="help" type="button">Jak grać?</button>
-      </div>
+    <section class="screen active title-screen" aria-label="Szpieg - ekran tytułowy">
+      <button class="title-hotspot title-hotspot-new" data-action="new-game" type="button" aria-label="Nowa gra"></button>
+      <button class="title-hotspot title-hotspot-help" data-action="help" type="button" aria-label="Jak grać?"></button>
       <div class="install-panel ${deferredInstallPrompt ? "" : "hidden"}" id="installPanel">
         <img src="./icons/icon-192.png" alt="">
         <div>
@@ -274,15 +269,31 @@ function renderSettings() {
   screenTitle.textContent = "Ustawienia gry";
   const count = clamp(Number(preferences.playerCount) || 4, 3, 12);
   const selectedSets = getSelectedPlaceSets();
+  const placeCount = getPlacesForSelection(selectedSets, preferences.customPlaces || "").length;
   const names = getDefaultNames(count);
   (preferences.names || []).forEach((name, index) => {
     if (index < count && name.trim()) names[index] = name.trim();
   });
   while (names.length < count) names.push("");
   app.innerHTML = html`
-    <section class="screen active panel">
-      <h2>Ustawienia gry</h2>
-      <div class="form-grid">
+    <section class="screen active dossier-screen">
+      <div class="dossier-paper">
+        <aside class="dossier-sidebar" aria-hidden="true">
+          <span class="secret-stamp">Ściśle tajne</span>
+          <span class="paperclip"></span>
+          <span class="evidence-photo city-photo"><span>Londyn</span></span>
+          <span class="evidence-photo suspect-photo"><span>Obserwacja</span></span>
+        </aside>
+        <div class="dossier-content">
+          <header class="dossier-header">
+            <span class="dossier-emblem">♠</span>
+            <div>
+              <p class="kicker">akta operacji</p>
+              <h2>Ustawienia gry</h2>
+            </div>
+            <p class="dossier-number">Dossier nr.<br><strong>847-AC</strong></p>
+          </header>
+          <div class="form-grid">
         <label class="field">
           <span>Liczba graczy</span>
           <select id="playerCount">
@@ -299,6 +310,9 @@ function renderSettings() {
         </div>
         <div class="field">
           <span>Kategorie miejsc</span>
+          <p class="settings-note ${placeCount < 10 ? "warning" : ""}">
+            ${placeCount ? `W puli losowania jest ${placeCount} miejsc.` : "Wybierz kategorie miejsc przed losowaniem."}
+          </p>
           <div class="mini-actions">
             <button class="button secondary compact" data-action="all-sets" type="button">Zaznacz wszystkie</button>
             <button class="button secondary compact" data-action="classic-set" type="button">Tylko klasyczne</button>
@@ -328,7 +342,10 @@ function renderSettings() {
             `).join("")}
           </div>
         </div>
-        <button class="button" data-action="draw" type="button">Losuj role</button>
+        <button class="button dossier-start" data-action="draw" type="button">Rozpocznij operację</button>
+          </div>
+          <span class="returned-stamp" aria-hidden="true">Odtajniono</span>
+        </div>
       </div>
     </section>
   `;
@@ -462,12 +479,15 @@ function renderDeal() {
 }
 
 function getPlaces() {
-  const selectedSets = getSelectedPlaceSets();
+  return getPlacesForSelection(getSelectedPlaceSets(), preferences.customPlaces || "");
+}
+
+function getPlacesForSelection(selectedSets, customPlacesText = "") {
   const builtInPlaces = selectedSets
     .filter((key) => PLACE_SETS[key])
     .flatMap((key) => PLACE_SETS[key].places);
   const customPlaces = selectedSets.includes("custom")
-    ? (preferences.customPlaces || "").split("\n").map((place) => place.trim()).filter(Boolean)
+    ? customPlacesText.split("\n").map((place) => place.trim()).filter(Boolean)
     : [];
   return unique([...builtInPlaces, ...customPlaces]);
 }
@@ -476,28 +496,36 @@ function renderCards() {
   if (!game) return setView("settings", false);
   screenTitle.textContent = "Karty graczy";
   const checked = game.players.filter((player) => player.checked).length;
+  const nextUncheckedIndex = game.players.findIndex((player) => !player.checked);
+  const nextPlayer = nextUncheckedIndex >= 0 ? game.players[nextUncheckedIndex].name : "";
   app.innerHTML = html`
-    <section class="screen active">
+    <section class="screen active card-table-screen">
       <div class="status-row">
         <strong>Role sprawdzone: ${checked}/${game.players.length}</strong>
-        <span>${checked === game.players.length ? "Możecie zaczynać rundę." : "Przekazuj telefon po kolei."}</span>
+        <span>${checked === game.players.length ? "Możecie zaczynać rundę." : `Teraz telefon bierze ${escapeHtml(nextPlayer)}.`}</span>
       </div>
       <div class="cards-grid">
         ${game.players.map((player, index) => `
-          <button class="player-card ${player.checked ? "checked" : ""}" data-player="${index}" type="button">
+          <button class="player-card ${player.checked ? "checked" : ""} ${index === nextUncheckedIndex ? "next" : ""}" data-player="${index}" type="button">
             <strong>${escapeHtml(player.name)}</strong>
-            <span>${player.checked ? "Sprawdzone" : "Kliknij, aby zobaczyć rolę"}</span>
+            <span class="card-label">${player.checked ? "Sprawdzone i ukryte" : index === nextUncheckedIndex ? "Następny gracz" : "Czeka na swoją kolej"}</span>
           </button>
         `).join("")}
       </div>
       <div class="actions" style="margin-top:18px">
         <button class="button" data-action="start-round" ${checked === game.players.length ? "" : "disabled"} type="button">Rozpocznij rundę</button>
+        <button class="button secondary" data-action="reshuffle" type="button">Losuj ponownie</button>
       </div>
     </section>
   `;
   document.querySelectorAll("[data-player]").forEach((card) => {
     card.addEventListener("click", () => {
-      game.currentRevealIndex = Number(card.dataset.player);
+      const playerIndex = Number(card.dataset.player);
+      if (game.players[playerIndex].checked) {
+        showToast("Nie ma podglądania ;)");
+        return;
+      }
+      game.currentRevealIndex = playerIndex;
       game.revealFlipped = false;
       setView("reveal");
     });
@@ -506,6 +534,13 @@ function renderCards() {
     game.paused = false;
     setView("round");
   });
+  document.querySelector('[data-action="reshuffle"]').addEventListener("click", reshuffleGame);
+}
+
+function reshuffleGame() {
+  if (!game) return setView("settings", false);
+  startGame({ keepPreferences: true });
+  showToast("Wylosowano nowe miejsce i nowego szpiega.");
 }
 
 function renderReveal() {
@@ -622,30 +657,47 @@ function stopTimerIfNeeded() {
 function renderVote() {
   if (!game) return setView("settings", false);
   screenTitle.textContent = "Głosowanie";
+  const selectedPlayer = game.selectedVote === null ? "" : game.players[game.selectedVote].name;
   app.innerHTML = html`
-    <section class="screen active panel">
+    <section class="screen active panel card-table-screen vote-screen">
       <h2>Kto według was jest szpiegiem?</h2>
+      <p class="subtitle">Najpierw wskażcie osobę, potem potwierdźcie wybór.</p>
       <div class="vote-grid">
         ${game.players.map((player, index) => `
-          <button class="player-card" data-vote="${index}" type="button">
+          <button class="player-card ${game.selectedVote === index ? "selected" : ""}" data-vote="${index}" type="button">
             <strong>${escapeHtml(player.name)}</strong>
-            <span>Wskaż tę osobę</span>
+            <span class="card-label">${game.selectedVote === index ? "Wybrany typ" : "Wskaż tę osobę"}</span>
           </button>
         `).join("")}
+      </div>
+      <div class="status-row vote-confirm ${game.selectedVote === null ? "hidden" : ""}">
+        <strong>Wybrany typ: ${escapeHtml(selectedPlayer)}</strong>
+        <span>Możecie jeszcze zmienić wybór przed potwierdzeniem.</span>
+      </div>
+      <div class="actions">
+        <button class="button" data-action="confirm-vote" ${game.selectedVote === null ? "disabled" : ""} type="button">Potwierdź głosowanie</button>
+        <button class="button secondary" data-action="back-to-round" type="button">Wróć do rundy</button>
       </div>
     </section>
   `;
   document.querySelectorAll("[data-vote]").forEach((button) => {
     button.addEventListener("click", () => {
       game.selectedVote = Number(button.dataset.vote);
-      if (game.selectedVote === game.spyIndex) {
-        game.spyGuess = "";
-        setView("result");
-      } else {
-        setView("spyGuess");
-      }
+      renderVote();
     });
   });
+  document.querySelector('[data-action="confirm-vote"]').addEventListener("click", confirmVote);
+  document.querySelector('[data-action="back-to-round"]').addEventListener("click", () => setView("round"));
+}
+
+function confirmVote() {
+  if (!game || game.selectedVote === null) return showToast("Najpierw wybierzcie podejrzanego.");
+  if (game.selectedVote === game.spyIndex) {
+    game.spyGuess = "";
+    setView("result");
+  } else {
+    setView("spyGuess");
+  }
 }
 
 function renderSpyGuess() {
@@ -842,9 +894,17 @@ window.addEventListener("beforeinstallprompt", (event) => {
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./service-worker.js").catch(() => {
-      console.info("Service worker nie został uruchomiony.");
-    });
+    navigator.serviceWorker.register("./service-worker.js")
+      .then((registration) => registration.update())
+      .catch(() => {
+        console.info("Service worker nie został uruchomiony.");
+      });
+  });
+
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (sessionStorage.getItem("szpieg-sw-refresh") === "done") return;
+    sessionStorage.setItem("szpieg-sw-refresh", "done");
+    window.location.reload();
   });
 }
 
