@@ -1,4 +1,4 @@
-const CACHE_NAME = "szpieg-v33";
+const CACHE_NAME = "szpieg-v38";
 const FILES_TO_CACHE = [
   "./",
   "./index.html",
@@ -13,7 +13,10 @@ const FILES_TO_CACHE = [
   "./icons/player-card-art.png",
   "./icons/cards-table-bg.jpeg",
   "./icons/dossier-bg.png",
-  "./icons/title-screen.png"
+  "./icons/title-screen.png",
+  "./icons/title-screen-mobile.png",
+  "./icons/help-screen.png",
+  "./icons/round-screen.png"
 ];
 
 self.addEventListener("install", (event) => {

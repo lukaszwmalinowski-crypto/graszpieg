@@ -221,8 +221,10 @@ function renderHome() {
   screenTitle.textContent = "Szpieg";
   app.innerHTML = html`
     <section class="screen active title-screen" aria-label="Szpieg - ekran tytułowy">
-      <button class="title-hotspot title-hotspot-new" data-action="new-game" type="button" aria-label="Nowa gra"></button>
-      <button class="title-hotspot title-hotspot-help" data-action="help" type="button" aria-label="Jak grać?"></button>
+      <div class="title-art">
+        <button class="title-hotspot title-hotspot-new" data-action="new-game" type="button" aria-label="Nowa gra"></button>
+        <button class="title-hotspot title-hotspot-help" data-action="help" type="button" aria-label="Jak grać?"></button>
+      </div>
       <div class="install-panel ${deferredInstallPrompt ? "" : "hidden"}" id="installPanel">
         <img src="./icons/icon-192.png" alt="">
         <div>
@@ -242,27 +244,13 @@ function renderHome() {
 function renderHelp() {
   screenTitle.textContent = "Jak grać?";
   app.innerHTML = html`
-    <section class="screen active panel">
-      <h2>Jak grać?</h2>
-      <ul class="help-list">
-        <li>Gracze po kolei sprawdzają swoje karty.</li>
-        <li>Zwykli gracze widzą wspólne miejsce, a szpieg go nie zna.</li>
-        <li>Po rozpoczęciu rundy gracze zadają sobie pytania.</li>
-        <li>Zwykli gracze próbują znaleźć szpiega.</li>
-        <li>Szpieg próbuje ukryć swoją rolę i odgadnąć miejsce.</li>
-      </ul>
-      <h3>Przykłady pytań</h3>
-      <ul class="help-list">
-        ${QUESTIONS.slice(0, 6).map((question) => `<li>${escapeHtml(question)}</li>`).join("")}
-      </ul>
-      <div class="actions">
-        <button class="button" data-action="back" type="button">Wróć</button>
-        <button class="button secondary" data-action="copy-rules" type="button">Kopiuj zasady</button>
+    <section class="screen active mission-screen" aria-label="Instrukcja misji">
+      <div class="mission-art">
+        <button class="mission-start" data-action="mission-start" type="button" aria-label="Rozpocznij operację"></button>
       </div>
     </section>
   `;
-  document.querySelector('[data-action="back"]').addEventListener("click", goBack);
-  document.querySelector('[data-action="copy-rules"]').addEventListener("click", copyRules);
+  document.querySelector('[data-action="mission-start"]').addEventListener("click", () => setView("settings"));
 }
 
 function renderSettings() {
@@ -590,28 +578,74 @@ function renderRound() {
   if (!game) return setView("settings", false);
   screenTitle.textContent = "Runda";
   const progress = getRoundProgress();
+  const selectedSets = getSelectedPlaceSets();
+  const categories = selectedSets.length === 1
+    ? (selectedSets[0] === "custom" ? "Własna lista" : PLACE_SETS[selectedSets[0]]?.label || "Miejsca")
+    : `${selectedSets.length} kategorie`;
   app.innerHTML = html`
-    <section class="screen active panel">
-      <h2>Runda rozpoczęta</h2>
-      <div class="round-layout">
-        <div class="timer-ring" style="--progress:${progress}">
-          <div>
-            <span class="timer" id="timer">${formatTime(game.remainingSeconds)}</span>
-            <small>${game.paused ? "pauza" : "czas rundy"}</small>
+    <section class="screen active round-screen">
+      <div class="round-board">
+        <div class="round-file-stamp">Centrum operacyjne</div>
+        <p class="round-dossier">Dossier nr.<br><strong>847-AC</strong></p>
+        <div class="round-layout">
+          <aside class="round-timer-panel">
+            <h2>Czas rundy</h2>
+            <div class="timer-ring" style="--progress:${progress}">
+              <div>
+                <span class="timer" id="timer">${formatTime(game.remainingSeconds)}</span>
+                <small>${game.paused ? "pauza" : "pozostało"}</small>
+              </div>
+            </div>
+            <div class="question-card">
+              <span class="card-mark">?</span>
+              <strong>Pytanie pomocnicze</strong>
+              <p>${game.question ? escapeHtml(game.question) : "Wylosuj pytanie pomocnicze, jeśli rozmowa potrzebuje iskry."}</p>
+            </div>
+          </aside>
+          <div class="round-command-panel">
+            <div class="round-brief">
+              <h2>Zadawajcie sobie pytania</h2>
+              <p>Odpowiedzi muszą być konkretne, ale nie mogą zbyt łatwo zdradzić miejsca.</p>
+            </div>
+            <div class="round-actions">
+              <button class="button secondary" data-action="pause" ${game.paused ? "disabled" : ""} type="button">Pauza</button>
+              <button class="button secondary" data-action="resume" ${game.paused ? "" : "disabled"} type="button">Wznów</button>
+              <button class="button secondary" data-action="question" type="button">Losowe pytanie</button>
+              <button class="button danger" data-action="end-round" type="button">Zakończ rundę</button>
+            </div>
+            <div class="round-settings-preview">
+              <h3>Podgląd ustawień</h3>
+              <div>
+                <article>
+                  <span class="round-stat-icon players"></span>
+                  <small>Liczba graczy</small>
+                  <strong>${game.players.length} graczy</strong>
+                </article>
+                <article>
+                  <span class="round-stat-icon clock"></span>
+                  <small>Czas rundy</small>
+                  <strong>${Math.round(game.roundSeconds / 60)} minut</strong>
+                </article>
+                <article>
+                  <span class="round-stat-icon folder"></span>
+                  <small>Kategorie miejsc</small>
+                  <strong>${escapeHtml(categories)}</strong>
+                </article>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="question-card">
-          <span class="card-mark">?</span>
-          <strong>Pytanie pomocnicze</strong>
-          <p>${game.question ? escapeHtml(game.question) : "Wylosuj pytanie pomocnicze, jeśli rozmowa potrzebuje iskry."}</p>
-        </div>
-      </div>
-      <p class="tip-box">Zadawajcie sobie pytania. Odpowiedzi muszą być konkretne, ale nie mogą zbyt łatwo zdradzić miejsca.</p>
-      <div class="actions">
-        <button class="button secondary" data-action="pause" ${game.paused ? "disabled" : ""} type="button">Pauza</button>
-        <button class="button secondary" data-action="resume" ${game.paused ? "" : "disabled"} type="button">Wznów</button>
-        <button class="button secondary" data-action="question" type="button">Losowe pytanie pomocnicze</button>
-        <button class="button danger" data-action="end-round" type="button">Zakończ rundę</button>
+        <section class="round-agents" aria-label="Agenci">
+          <h3>Agenci</h3>
+          <div>
+            ${game.players.map((player) => `
+              <article class="round-agent-card">
+                <span></span>
+                <strong>${escapeHtml(player.name)}</strong>
+              </article>
+            `).join("")}
+          </div>
+        </section>
       </div>
     </section>
   `;
