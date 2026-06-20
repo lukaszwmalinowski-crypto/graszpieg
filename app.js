@@ -178,7 +178,7 @@ function setView(nextView, push = true) {
   view = nextView;
   clearToast();
   render();
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  window.scrollTo({ top: 0, behavior: "auto" });
 }
 
 function goBack() {
@@ -261,8 +261,16 @@ function renderHelp() {
     </section>
   `;
   updateMissionCards();
-  document.querySelector('[data-action="mission-prev"]').addEventListener("click", () => updateMissionCards(helpSlideIndex - 1));
-  document.querySelector('[data-action="mission-next"]').addEventListener("click", () => updateMissionCards(helpSlideIndex + 1));
+  document.querySelector('[data-action="mission-prev"]').addEventListener("click", (event) => {
+    updateMissionCards(helpSlideIndex - 1);
+    event.currentTarget.blur();
+    requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "auto" }));
+  });
+  document.querySelector('[data-action="mission-next"]').addEventListener("click", (event) => {
+    updateMissionCards(helpSlideIndex + 1);
+    event.currentTarget.blur();
+    requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "auto" }));
+  });
   document.querySelector('[data-action="mission-start"]').addEventListener("click", () => setView("settings"));
   document.querySelector("#missionCardStack").addEventListener("keydown", (event) => {
     if (event.key === "ArrowLeft") updateMissionCards(helpSlideIndex - 1);
@@ -575,9 +583,9 @@ function renderReveal() {
     <section class="screen active reveal-screen">
       <div class="flip-stage">
         <div class="flip-card ${isSpy ? "spy-card" : "place-card"} ${game.revealFlipped ? "is-flipped" : ""}" role="button" tabindex="0" aria-label="${game.revealFlipped ? "Ukryj kartę" : "Odkryj rolę"}">
-          <button class="flip-face flip-back" data-action="flip-role" type="button" aria-label="Odkryj rolę">
+          <div class="flip-face flip-back" aria-hidden="true">
             <span class="reveal-back-name">${escapeHtml(player.name)}</span>
-          </button>
+          </div>
           <div class="flip-face flip-front">
             <div class="reveal-role-card ${isSpy ? "spy" : "agent"}">
               ${isSpy ? `
@@ -592,10 +600,12 @@ function renderReveal() {
     </section>
   `;
   const completeReveal = () => {
+    const flipCard = document.querySelector(".flip-card");
+    flipCard?.classList.add("is-hiding");
     game.players[game.currentRevealIndex].checked = true;
     game.currentRevealIndex = null;
     game.revealFlipped = false;
-    setView("cards");
+    window.setTimeout(() => setView("cards"), 180);
   };
   const toggleReveal = () => {
     const flipCard = document.querySelector(".flip-card");

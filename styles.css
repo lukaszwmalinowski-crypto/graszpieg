@@ -28,6 +28,10 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: auto;
+}
+
 body {
   min-height: 100vh;
   margin: 0;
@@ -59,6 +63,8 @@ textarea {
 
 button {
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .app-shell {
@@ -147,7 +153,7 @@ h3 {
 
 .screen {
   display: none;
-  animation: appear 260ms ease both;
+  animation: appear 180ms ease-out both;
 }
 
 .screen.active {
@@ -198,6 +204,7 @@ h3 {
   pointer-events: none;
   transform: translate(-50%, -50%) scale(0.96);
   animation: spyUnderGlow 4.8s ease-in-out infinite;
+  will-change: opacity, transform;
 }
 
 .title-art {
@@ -648,10 +655,11 @@ h3 {
   z-index: calc(8 - var(--distance));
   border-radius: 8px;
   opacity: 0;
-  filter: drop-shadow(0 22px 50px rgba(0, 0, 0, 0.56));
+  filter: drop-shadow(0 18px 38px rgba(0, 0, 0, 0.52));
   pointer-events: none;
   transform-origin: 50% 92%;
-  transition: transform 420ms cubic-bezier(.2, .78, .2, 1), opacity 280ms ease, filter 280ms ease;
+  transition: transform 280ms cubic-bezier(.22, .78, .24, 1), opacity 180ms ease, filter 180ms ease;
+  will-change: transform, opacity;
 }
 
 .mission-image-card img {
@@ -843,7 +851,7 @@ h3 {
   font-family: system-ui, sans-serif;
   font-weight: 800;
   box-shadow: 0 10px 28px rgba(217, 182, 91, 0.18);
-  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  transition: transform 110ms ease-out, border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
 }
 
 .button.secondary {
@@ -883,7 +891,18 @@ h3 {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.035));
   color: var(--text);
   font-size: 1.35rem;
-  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+  transition: transform 110ms ease-out, border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.button:active,
+.icon-button:active,
+.player-card:active,
+.flip-card:active {
+  transform: scale(0.985);
+}
+
+.title-hotspot:active {
+  transform: translateX(-50%) scale(0.985);
 }
 
 .panel,
@@ -1438,7 +1457,8 @@ textarea {
   color: var(--text);
   text-align: center;
   box-shadow: 0 18px 42px rgba(0, 0, 0, 0.35);
-  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+  transition: transform 120ms ease-out, border-color 140ms ease, box-shadow 140ms ease, filter 140ms ease;
+  will-change: transform;
   overflow: hidden;
   aspect-ratio: 0.68;
 }
@@ -1611,9 +1631,14 @@ textarea {
   width: min(92vw, 420px);
   aspect-ratio: 1086 / 1448;
   transform-style: preserve-3d;
-  animation: cardEnter 420ms cubic-bezier(.2, .8, .2, 1) both;
+  animation: cardEnter 260ms cubic-bezier(.2, .8, .2, 1) both;
   cursor: pointer;
   z-index: 1;
+  will-change: transform, opacity;
+}
+
+.flip-card.is-hiding {
+  animation: hideCard 180ms ease-in both;
 }
 
 .flip-card.is-flipped {
@@ -1641,7 +1666,8 @@ textarea {
   text-align: center;
   backface-visibility: hidden;
   overflow: hidden;
-  transition: transform 680ms cubic-bezier(.2, .78, .2, 1), box-shadow 220ms ease;
+  transition: transform 420ms cubic-bezier(.2, .78, .2, 1), box-shadow 160ms ease;
+  will-change: transform;
 }
 
 .flip-front {
@@ -1676,7 +1702,7 @@ textarea {
   padding: 0;
   background: url("./icons-lite/reveal-card-back.jpg") center / contain no-repeat;
   color: transparent;
-  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+  transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
 }
 
 .flip-back::before {
@@ -2312,11 +2338,18 @@ textarea {
 @keyframes cardEnter {
   from {
     opacity: 0;
-    transform: translateY(28px) rotateX(8deg) scale(0.96);
+    transform: translateY(16px) rotateX(4deg) scale(0.98);
   }
   to {
     opacity: 1;
     transform: translateY(0) rotateX(0) scale(1);
+  }
+}
+
+@keyframes hideCard {
+  to {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
   }
 }
 
@@ -2360,8 +2393,270 @@ textarea {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+
   .title-screen::after {
     animation: none;
+  }
+}
+
+@media (hover: none) {
+  .button:hover,
+  .icon-button:hover,
+  .player-card:hover,
+  .flip-back:hover {
+    transform: none;
+    box-shadow: var(--shadow-tight);
+  }
+
+  .title-hotspot:hover {
+    transform: translateX(-50%);
+  }
+}
+
+@media (min-width: 621px) and (max-width: 1180px) {
+  :root {
+    --space-3: 16px;
+    --space-4: 22px;
+    --space-5: 28px;
+  }
+
+  .app-shell {
+    width: 100%;
+    padding: 16px max(18px, env(safe-area-inset-left)) max(28px, env(safe-area-inset-bottom));
+  }
+
+  .topbar {
+    min-height: 66px;
+    margin-bottom: 18px;
+  }
+
+  .topbar h1 {
+    font-size: clamp(2.35rem, 6.5vw, 4.25rem);
+  }
+
+  body[data-view="home"] .app-shell {
+    padding: 0;
+  }
+
+  .title-screen {
+    min-height: 100svh;
+  }
+
+  .title-art {
+    width: min(100vw, calc(100svh * 1.2496));
+  }
+
+  .mission-card-screen {
+    min-height: calc(100svh - 96px);
+    padding: 6px 0 14px;
+  }
+
+  .mission-card-stack {
+    width: min(76vw, calc((100svh - 116px) * 0.5628));
+    max-width: 560px;
+  }
+
+  .dossier-screen {
+    padding: 6px 0 18px;
+  }
+
+  .dossier-paper {
+    width: min(100%, 1060px);
+    min-height: 0;
+    margin: 0 auto;
+  }
+
+  .dossier-content {
+    width: 61%;
+    margin: 13% auto 0;
+  }
+
+  .dossier-title h2 {
+    font-size: clamp(2.5rem, 7vw, 5rem);
+  }
+
+  .dossier-screen .form-grid {
+    gap: 12px 16px;
+  }
+
+  .dossier-screen .field {
+    grid-template-columns: minmax(148px, 0.7fr) minmax(0, 1fr);
+  }
+
+  .dossier-screen .check-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .dossier-screen .names-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .dossier-screen .check-card {
+    min-height: 48px;
+    padding: 8px 10px;
+    font-size: clamp(0.74rem, 1.65vw, 0.95rem);
+  }
+
+  .dossier-start {
+    width: min(78%, 520px);
+    min-height: 56px;
+  }
+
+  .card-table-screen {
+    padding: 18px;
+  }
+
+  .cards-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .player-card {
+    min-height: 0;
+    aspect-ratio: 0.68;
+  }
+
+  .player-card > strong {
+    font-size: clamp(1.1rem, 2.4vw, 1.55rem);
+  }
+
+  .player-card > .card-label {
+    font-size: clamp(0.74rem, 1.6vw, 0.9rem);
+  }
+
+  .reveal-screen {
+    margin: 0;
+  }
+
+  .flip-stage {
+    min-height: calc(100svh - 106px);
+    padding-bottom: 28px;
+  }
+
+  .flip-card {
+    width: min(52vw, calc((100svh - 132px) * 0.75), 460px);
+  }
+
+  .round-screen {
+    min-height: calc(100svh - 104px);
+    padding: 14px;
+  }
+
+  .round-board {
+    min-height: auto;
+    padding: 66px 22px 24px;
+  }
+
+  .round-layout {
+    grid-template-columns: minmax(220px, 34%) 1fr;
+  }
+
+  .round-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .round-settings-preview > div {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .round-agents > div {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 621px) and (max-width: 1180px) and (orientation: portrait) {
+  .app-shell {
+    padding-inline: max(14px, env(safe-area-inset-left)) max(14px, env(safe-area-inset-right));
+  }
+
+  .title-art {
+    width: min(100vw, calc(100svh * 0.4626));
+    max-width: 640px;
+    aspect-ratio: 853 / 1844;
+    background-image: url("./icons-lite/title-screen-mobile.jpg");
+  }
+
+  .title-screen::after {
+    left: 16%;
+    top: 41%;
+    width: 34%;
+    height: 22%;
+  }
+
+  .title-hotspot {
+    width: 61.5%;
+    height: 6.8%;
+  }
+
+  .title-hotspot-new {
+    top: 63.6%;
+  }
+
+  .title-hotspot-help {
+    top: 72.1%;
+    width: 48%;
+  }
+
+  .mission-card-stack {
+    width: min(78vw, calc((100svh - 116px) * 0.5628), 620px);
+  }
+
+  .dossier-paper {
+    aspect-ratio: auto;
+    min-height: calc(100svh - 104px);
+    background:
+      linear-gradient(180deg, rgba(15, 10, 6, 0.03), rgba(15, 10, 6, 0.08)),
+      url("./icons-lite/dossier-bg.jpg") center top / auto 100% no-repeat,
+      #c7a06f;
+  }
+
+  .dossier-content {
+    width: min(72%, 620px);
+    margin-top: clamp(104px, 13svh, 144px);
+  }
+
+  .card-table-screen {
+    min-height: calc(100svh - 118px);
+    display: grid;
+    align-content: start;
+  }
+
+  .cards-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 680px;
+    margin-inline: auto;
+  }
+
+  .player-card {
+    width: min(100%, 310px);
+    justify-self: center;
+  }
+
+  .flip-card {
+    width: min(62vw, calc((100svh - 132px) * 0.75), 470px);
+  }
+
+  .round-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .round-timer-panel {
+    grid-template-columns: minmax(220px, 280px) 1fr;
+    align-items: center;
+  }
+
+  .round-timer-panel h2,
+  .timer-ring,
+  .question-card {
+    grid-column: auto;
   }
 }
 
