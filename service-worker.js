@@ -1,4 +1,4 @@
-const CACHE_NAME = "szpieg-v42";
+const CACHE_NAME = "szpieg-v52";
 const FILES_TO_CACHE = [
   "./",
   "./index.html",
@@ -9,19 +9,23 @@ const FILES_TO_CACHE = [
   "./icons/icon.svg",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
-  "./icons/icon-1024.png",
-  "./icons/player-card-art.png",
-  "./icons/cards-table-bg.jpeg",
-  "./icons/dossier-bg.png",
-  "./icons/title-screen.png",
-  "./icons/title-screen-mobile.png",
-  "./icons/help-screen.png",
-  "./icons/help-step-1.png",
-  "./icons/help-step-2.png",
-  "./icons/help-step-3.png",
-  "./icons/help-step-4.png",
-  "./icons/help-step-5.png",
-  "./icons/round-screen.png"
+  "./icons-lite/player-card-art.jpg",
+  "./icons-lite/reveal-agent-card.jpg",
+  "./icons-lite/reveal-spy-card.jpg",
+  "./icons-lite/reveal-card-back.jpg",
+  "./icons-lite/reveal-bg-desktop.jpg",
+  "./icons-lite/reveal-bg-mobile.jpg",
+  "./icons-lite/cards-table-bg.jpg",
+  "./icons-lite/dossier-bg.jpg",
+  "./icons-lite/title-screen.jpg",
+  "./icons-lite/title-screen-mobile.jpg",
+  "./icons-lite/help-screen.jpg",
+  "./icons-lite/help-step-1.jpg",
+  "./icons-lite/help-step-2.jpg",
+  "./icons-lite/help-step-3.jpg",
+  "./icons-lite/help-step-4.jpg",
+  "./icons-lite/help-step-5.jpg",
+  "./icons-lite/round-screen.jpg"
 ];
 
 self.addEventListener("install", (event) => {

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Szpieg">
+  <rect width="512" height="512" rx="96" fill="#101623"/>
+  <path d="M92 165c42-58 105-87 164-87s122 29 164 87c-37 18-91 28-164 28s-127-10-164-28z" fill="#d9b65b"/>
+  <path d="M124 212h264c19 0 34 15 34 34v12c0 19-15 34-34 34H124c-19 0-34-15-34-34v-12c0-19 15-34 34-34z" fill="#0a0e16"/>
+  <circle cx="190" cy="252" r="34" fill="#f6efe0"/>
+  <circle cx="322" cy="252" r="34" fill="#f6efe0"/>
+  <circle cx="190" cy="252" r="14" fill="#9d2937"/>
+  <circle cx="322" cy="252" r="14" fill="#9d2937"/>
+  <path d="M154 366c62 45 142 45 204 0" fill="none" stroke="#d9b65b" stroke-width="22" stroke-linecap="round"/>
+  <path d="M256 302l-26 44h52l-26-44z" fill="#9d2937"/>
+</svg>

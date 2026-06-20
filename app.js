@@ -244,7 +244,7 @@ function renderHome() {
 
 function renderHelp() {
   screenTitle.textContent = "Jak grać?";
-  const slides = [1, 2, 3, 4, 5].map((number) => `./icons/help-step-${number}.png`);
+  const slides = [1, 2, 3, 4, 5].map((number) => `./icons-lite/help-step-${number}.jpg`);
   helpSlideIndex = clamp(helpSlideIndex, 0, slides.length - 1);
   app.innerHTML = html`
     <section class="screen active mission-card-screen" aria-label="Instrukcja misji">
@@ -545,7 +545,7 @@ function renderCards() {
     card.addEventListener("click", () => {
       const playerIndex = Number(card.dataset.player);
       if (game.players[playerIndex].checked) {
-        showToast("Nie ma podglądania ;)");
+        showToast("Nie wolno podglądać ;)");
         return;
       }
       game.currentRevealIndex = playerIndex;
@@ -572,40 +572,47 @@ function renderReveal() {
   const isSpy = game.currentRevealIndex === game.spyIndex;
   screenTitle.textContent = player.name;
   app.innerHTML = html`
-    <section class="screen active">
+    <section class="screen active reveal-screen">
       <div class="flip-stage">
-        <div class="flip-card ${isSpy ? "spy-card" : "place-card"} ${game.revealFlipped ? "is-flipped" : ""}">
+        <div class="flip-card ${isSpy ? "spy-card" : "place-card"} ${game.revealFlipped ? "is-flipped" : ""}" role="button" tabindex="0" aria-label="${game.revealFlipped ? "Ukryj kartę" : "Odkryj rolę"}">
           <button class="flip-face flip-back" data-action="flip-role" type="button" aria-label="Odkryj rolę">
-            <span class="card-mark">♠</span>
-            <strong>${escapeHtml(player.name)}</strong>
-            <span>Kliknij kartę, aby zobaczyć rolę</span>
+            <span class="reveal-back-name">${escapeHtml(player.name)}</span>
           </button>
           <div class="flip-face flip-front">
-            <p class="role-name">${escapeHtml(player.name)}</p>
-            ${isSpy ? `
-              <h2 class="spy-name"><span>JESTEŚ</span><span>SZPIEGIEM</span></h2>
-              <p class="subtitle">Słuchaj pytań i spróbuj odgadnąć miejsce.</p>
-            ` : `
-              <p class="subtitle">Twoje miejsce to:</p>
-              <h2 class="place-name">${escapeHtml(game.place)}</h2>
-              <p class="subtitle">Zapamiętaj miejsce i nie pokazuj karty innym.</p>
-            `}
-            <button class="button" data-action="hide-role" type="button">Ukryj i przekaż dalej</button>
+            <div class="reveal-role-card ${isSpy ? "spy" : "agent"}">
+              ${isSpy ? `
+                
+              ` : `
+                <span class="reveal-location">${escapeHtml(game.place)}</span>
+              `}
+            </div>
           </div>
         </div>
       </div>
     </section>
   `;
-  document.querySelector('[data-action="flip-role"]')?.addEventListener("click", () => {
-    const flipCard = document.querySelector(".flip-card");
-    game.revealFlipped = true;
-    flipCard?.classList.add("is-flipped");
-  });
-  document.querySelector('[data-action="hide-role"]').addEventListener("click", () => {
+  const completeReveal = () => {
     game.players[game.currentRevealIndex].checked = true;
     game.currentRevealIndex = null;
     game.revealFlipped = false;
     setView("cards");
+  };
+  const toggleReveal = () => {
+    const flipCard = document.querySelector(".flip-card");
+    if (!game.revealFlipped) {
+      game.revealFlipped = true;
+      flipCard?.classList.add("is-flipped");
+      flipCard?.setAttribute("aria-label", "Ukryj kartę");
+      return;
+    }
+    completeReveal();
+  };
+  document.querySelector(".flip-card")?.addEventListener("click", toggleReveal);
+  document.querySelector(".flip-card")?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      toggleReveal();
+    }
   });
 }
 
