@@ -1603,6 +1603,89 @@ textarea {
   pointer-events: none;
 }
 
+.handoff-screen {
+  position: relative;
+  display: grid !important;
+  min-height: calc(100vh - 130px);
+  min-height: calc(100svh - 130px);
+  place-items: center;
+  border-radius: 8px;
+  padding: clamp(18px, 4vw, 34px);
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.5)),
+    url("./icons-lite/reveal-bg-desktop.jpg") center / cover no-repeat,
+    #100b06;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.handoff-screen::before {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 44%, rgba(255, 226, 164, 0.18), transparent 40%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.36), transparent 24%, transparent 76%, rgba(0, 0, 0, 0.36));
+  content: "";
+  pointer-events: none;
+}
+
+.handoff-dossier {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: min(92vw, 520px);
+  gap: 14px;
+  justify-items: center;
+  border: 1px solid rgba(53, 32, 17, 0.48);
+  border-radius: 8px;
+  padding: clamp(28px, 5vw, 46px);
+  background:
+    linear-gradient(180deg, rgba(238, 218, 177, 0.9), rgba(198, 164, 113, 0.92)),
+    var(--texture);
+  color: #120c07;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.52), inset 0 0 0 2px rgba(255, 244, 214, 0.18);
+  text-align: center;
+}
+
+.handoff-stamp {
+  border: 2px solid #8c241c;
+  padding: 5px 14px;
+  color: #8c241c;
+  font-family: "Courier New", ui-monospace, monospace;
+  font-weight: 950;
+  text-transform: uppercase;
+  transform: rotate(-7deg);
+}
+
+.handoff-dossier p {
+  margin: 4px 0 -4px;
+  color: #6f1f17;
+  font-family: "Courier New", ui-monospace, monospace;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.handoff-dossier h2 {
+  margin: 0;
+  color: #070504;
+  font-size: clamp(3rem, 12vw, 5.8rem);
+  line-height: 0.9;
+}
+
+.handoff-dossier small {
+  max-width: 360px;
+  color: #2b1b10;
+  font-family: "Courier New", ui-monospace, monospace;
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.handoff-button {
+  width: min(100%, 340px);
+  margin-top: 6px;
+}
+
 .flip-stage {
   position: relative;
   display: grid;
@@ -2004,6 +2087,11 @@ textarea {
   box-shadow: 0 12px 20px rgba(45, 25, 14, 0.24);
 }
 
+.timer-ring.urgent {
+  animation: timerPulse 950ms ease-in-out infinite;
+  box-shadow: 0 12px 20px rgba(45, 25, 14, 0.24), 0 0 0 6px rgba(140, 36, 28, 0.12);
+}
+
 .timer-ring > div {
   display: grid;
   width: 72%;
@@ -2353,6 +2441,19 @@ textarea {
   }
 }
 
+@keyframes timerPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: saturate(1);
+  }
+
+  50% {
+    transform: scale(1.025);
+    filter: saturate(1.22);
+  }
+}
+
 @keyframes dealCard {
   0% {
     opacity: 0;
@@ -2545,6 +2646,10 @@ textarea {
     width: min(52vw, calc((100svh - 132px) * 0.75), 460px);
   }
 
+  .handoff-screen {
+    min-height: calc(100svh - 106px);
+  }
+
   .round-screen {
     min-height: calc(100svh - 104px);
     padding: 14px;
@@ -2658,6 +2763,7 @@ textarea {
   .question-card {
     grid-column: auto;
   }
+
 }
 
 @media (max-width: 620px) {
@@ -3028,6 +3134,26 @@ textarea {
     width: min(92vw, calc((100svh - 178px) * 0.75));
     min-height: 0;
     aspect-ratio: 1086 / 1448;
+  }
+
+  .handoff-screen {
+    min-height: calc(100svh - 86px);
+    margin: calc(var(--space-2) * -1);
+    border-radius: 0;
+    padding: 18px;
+    background:
+      linear-gradient(180deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.46)),
+      url("./icons-lite/reveal-bg-mobile.jpg") center / cover no-repeat,
+      #100b06;
+  }
+
+  .handoff-dossier {
+    width: min(100%, 390px);
+    padding: 26px 20px;
+  }
+
+  .handoff-dossier h2 {
+    font-size: clamp(2.6rem, 16vw, 4.6rem);
   }
 
   .reveal-screen {

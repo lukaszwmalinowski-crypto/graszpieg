@@ -140,6 +140,8 @@ let timerId = null;
 let toastTimerId = null;
 let deferredInstallPrompt = null;
 let helpSlideIndex = 0;
+let helpTouchStartX = 0;
+let helpTouchStartY = 0;
 
 function loadPreferences() {
   try {
@@ -276,6 +278,19 @@ function renderHelp() {
     if (event.key === "ArrowLeft") updateMissionCards(helpSlideIndex - 1);
     if (event.key === "ArrowRight") updateMissionCards(helpSlideIndex + 1);
   });
+  document.querySelector("#missionCardStack").addEventListener("touchstart", (event) => {
+    const touch = event.touches[0];
+    helpTouchStartX = touch.clientX;
+    helpTouchStartY = touch.clientY;
+  }, { passive: true });
+  document.querySelector("#missionCardStack").addEventListener("touchend", (event) => {
+    const touch = event.changedTouches[0];
+    const deltaX = touch.clientX - helpTouchStartX;
+    const deltaY = touch.clientY - helpTouchStartY;
+    if (Math.abs(deltaX) < 44 || Math.abs(deltaX) < Math.abs(deltaY) * 1.2) return;
+    updateMissionCards(helpSlideIndex + (deltaX < 0 ? 1 : -1));
+    requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "auto" }));
+  }, { passive: true });
 }
 
 function updateMissionCards(nextIndex = helpSlideIndex) {
@@ -558,6 +573,7 @@ function renderCards() {
       }
       game.currentRevealIndex = playerIndex;
       game.revealFlipped = false;
+      game.revealReady = false;
       setView("reveal");
     });
   });
@@ -579,6 +595,24 @@ function renderReveal() {
   const player = game.players[game.currentRevealIndex];
   const isSpy = game.currentRevealIndex === game.spyIndex;
   screenTitle.textContent = player.name;
+  if (!game.revealReady) {
+    app.innerHTML = html`
+      <section class="screen active handoff-screen">
+        <div class="handoff-dossier">
+          <span class="handoff-stamp">Tajne</span>
+          <p>Przekaż telefon</p>
+          <h2>${escapeHtml(player.name)}</h2>
+          <small>Gdy gracz jest gotowy, niech dotknie ekranu i odbierze swoją kartę.</small>
+          <button class="button handoff-button" data-action="ready-reveal" type="button">Odbierz kartę</button>
+        </div>
+      </section>
+    `;
+    document.querySelector('[data-action="ready-reveal"]').addEventListener("click", () => {
+      game.revealReady = true;
+      renderReveal();
+    });
+    return;
+  }
   app.innerHTML = html`
     <section class="screen active reveal-screen">
       <div class="flip-stage">
@@ -605,6 +639,7 @@ function renderReveal() {
     game.players[game.currentRevealIndex].checked = true;
     game.currentRevealIndex = null;
     game.revealFlipped = false;
+    game.revealReady = false;
     window.setTimeout(() => setView("cards"), 180);
   };
   const toggleReveal = () => {
@@ -642,7 +677,7 @@ function renderRound() {
         <div class="round-layout">
           <aside class="round-timer-panel">
             <h2>Czas rundy</h2>
-            <div class="timer-ring" style="--progress:${progress}">
+            <div class="timer-ring ${game.remainingSeconds <= 30 && !game.paused ? "urgent" : ""}" style="--progress:${progress}">
               <div>
                 <span class="timer" id="timer">${formatTime(game.remainingSeconds)}</span>
                 <small>${game.paused ? "pauza" : "pozostało"}</small>
@@ -726,7 +761,10 @@ function startTimer() {
     const timer = document.querySelector("#timer");
     if (timer) timer.textContent = formatTime(game.remainingSeconds);
     const ring = document.querySelector(".timer-ring");
-    if (ring) ring.style.setProperty("--progress", getRoundProgress());
+    if (ring) {
+      ring.style.setProperty("--progress", getRoundProgress());
+      ring.classList.toggle("urgent", game.remainingSeconds <= 30 && !game.paused);
+    }
     if (game.remainingSeconds === 0) {
       clearInterval(timerId);
       game.paused = true;
