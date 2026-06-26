@@ -132,6 +132,7 @@ const DEFAULTS = {
 };
 const LEGACY_SAMPLE_NAMES = ["Ania", "Bartek", "Celina", "Darek"];
 const USED_PLACES_KEY = "szpieg-used-places";
+const PUBLIC_GAME_URL = "https://lukaszwmalinowski-crypto.github.io/graszpieg/";
 
 let view = "home";
 let historyStack = [];
@@ -143,6 +144,7 @@ let deferredInstallPrompt = null;
 let helpSlideIndex = 0;
 let helpTouchStartX = 0;
 let helpTouchStartY = 0;
+let installGuidePlatform = "iphone";
 
 function loadPreferences() {
   try {
@@ -209,6 +211,7 @@ function render() {
   const screens = {
     home: renderHome,
     help: renderHelp,
+    install: renderInstallGuide,
     settings: renderSettings,
     deal: renderDeal,
     cards: renderCards,
@@ -261,6 +264,7 @@ function renderHelp() {
         <button class="mission-card-hotspot mission-card-next" data-action="mission-next" type="button" aria-label="Następny krok"></button>
         <button class="mission-card-hotspot mission-card-start" data-action="mission-start" type="button" aria-label="Rozpocznij operację"></button>
       </div>
+      <button class="button mission-install-guide" data-action="install-guide" type="button">Zainstaluj grę</button>
     </section>
   `;
   updateMissionCards();
@@ -275,6 +279,7 @@ function renderHelp() {
     requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "auto" }));
   });
   document.querySelector('[data-action="mission-start"]').addEventListener("click", () => setView("settings"));
+  document.querySelector('[data-action="install-guide"]').addEventListener("click", () => setView("install"));
   document.querySelector("#missionCardStack").addEventListener("keydown", (event) => {
     if (event.key === "ArrowLeft") updateMissionCards(helpSlideIndex - 1);
     if (event.key === "ArrowRight") updateMissionCards(helpSlideIndex + 1);
@@ -310,6 +315,47 @@ function updateMissionCards(nextIndex = helpSlideIndex) {
   document.querySelector('[data-action="mission-prev"]').disabled = helpSlideIndex === 0;
   document.querySelector('[data-action="mission-next"]').disabled = helpSlideIndex === cards.length - 1;
   document.querySelector('[data-action="mission-start"]').classList.toggle("visible", helpSlideIndex === cards.length - 1);
+  document.querySelector('[data-action="install-guide"]')?.classList.toggle("visible", helpSlideIndex === cards.length - 1);
+}
+
+function renderInstallGuide() {
+  screenTitle.textContent = "Instalacja";
+  const isAndroid = installGuidePlatform === "android";
+  const imageSrc = isAndroid ? "./icons-lite/install-android.jpg" : "./icons-lite/install-iphone.jpg";
+  const imageAlt = isAndroid ? "Instrukcja instalacji gry na Androidzie" : "Instrukcja instalacji gry na iPhonie";
+  app.innerHTML = html`
+    <section class="screen active install-guide-screen">
+      <div class="install-guide-tabs" aria-label="Wybierz urządzenie">
+        <button class="${!isAndroid ? "active" : ""}" data-install-platform="iphone" type="button">iPhone</button>
+        <button class="${isAndroid ? "active" : ""}" data-install-platform="android" type="button">Android</button>
+      </div>
+      <article class="install-guide-card">
+        <img src="${imageSrc}" alt="${imageAlt}">
+      </article>
+      <div class="install-link-card">
+        <span>Adres gry</span>
+        <strong>${PUBLIC_GAME_URL}</strong>
+        <button class="button secondary compact" data-action="copy-install-link" type="button">Kopiuj link</button>
+      </div>
+      <div class="actions install-guide-actions">
+        <button class="button" data-action="install-start-game" type="button">Rozpocznij operację</button>
+        <button class="button secondary" data-action="install-back-help" type="button">Wróć do instrukcji</button>
+      </div>
+    </section>
+  `;
+  document.querySelectorAll("[data-install-platform]").forEach((button) => {
+    button.addEventListener("click", () => {
+      installGuidePlatform = button.dataset.installPlatform;
+      renderInstallGuide();
+    });
+  });
+  document.querySelector('[data-action="copy-install-link"]').addEventListener("click", () => {
+    navigator.clipboard?.writeText(PUBLIC_GAME_URL)
+      .then(() => showToast("Link skopiowany."))
+      .catch(() => showToast("Nie udało się skopiować linku."));
+  });
+  document.querySelector('[data-action="install-start-game"]').addEventListener("click", () => setView("settings"));
+  document.querySelector('[data-action="install-back-help"]').addEventListener("click", () => setView("help"));
 }
 
 function renderSettings() {
@@ -750,7 +796,7 @@ function renderVote() {
       <p class="subtitle">Najpierw wskażcie osobę, potem potwierdźcie wybór.</p>
       <div class="vote-grid">
         ${game.players.map((player, index) => `
-          <button class="player-card ${game.selectedVote === index ? "selected" : ""}" data-vote="${index}" type="button">
+          <button class="player-card ${game.selectedVote === index ? "selected" : ""} ${game.selectedVote !== null && game.selectedVote !== index ? "dimmed" : ""}" data-vote="${index}" type="button">
             <strong>${escapeHtml(player.name)}</strong>
             <span class="card-label">${game.selectedVote === index ? "Wybrany typ" : "Wskaż tę osobę"}</span>
           </button>
