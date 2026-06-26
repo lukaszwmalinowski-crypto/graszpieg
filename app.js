@@ -687,10 +687,10 @@ function renderRound() {
                 <p>${game.question ? escapeHtml(game.question) : "Wylosuj pytanie pomocnicze, jeśli rozmowa potrzebuje iskry."}</p>
               </div>
             </div>
+            <button class="button question-draw-button" data-action="question" type="button">Losuj pytanie pomocnicze</button>
             <div class="round-actions">
               <button class="button secondary" data-action="pause" ${game.paused ? "disabled" : ""} type="button">Pauza</button>
               <button class="button secondary" data-action="resume" ${game.paused ? "" : "disabled"} type="button">Wznów</button>
-              <button class="button secondary" data-action="question" type="button">Losowe pytanie pomocnicze</button>
               <button class="button danger" data-action="end-round" type="button">Zakończ rundę</button>
             </div>
           </div>

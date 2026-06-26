@@ -2263,6 +2263,24 @@ textarea {
   gap: 12px;
 }
 
+.question-draw-button {
+  width: min(100%, 460px);
+  min-height: 62px;
+  justify-self: center;
+  border: 2px solid rgba(217, 182, 91, 0.58);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(217, 182, 91, 0.24), transparent 40%),
+    linear-gradient(180deg, #a83429, #761e17);
+  color: #f7e6bd;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-weight: 950;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  box-shadow: 0 12px 24px rgba(92, 35, 20, 0.28), inset 0 0 0 1px rgba(255, 238, 191, 0.22);
+}
+
 .round-actions .button {
   min-height: 66px;
   border-color: rgba(31, 20, 12, 0.5);
@@ -3214,6 +3232,12 @@ textarea {
     font-size: clamp(1rem, 5.2vw, 1.32rem);
     line-height: 1.24;
     text-align: center;
+  }
+
+  .question-draw-button {
+    width: 100%;
+    min-height: 50px;
+    font-size: 0.9rem;
   }
 
   .round-actions {
