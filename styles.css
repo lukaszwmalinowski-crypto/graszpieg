@@ -930,7 +930,7 @@ h3 {
   position: relative;
   display: block;
   aspect-ratio: 1402 / 1122;
-  min-height: 640px;
+  min-height: 720px;
   border-radius: 8px;
   background:
     linear-gradient(180deg, rgba(15, 10, 6, 0.03), rgba(15, 10, 6, 0.08)),
@@ -1052,13 +1052,18 @@ h3 {
 }
 
 .dossier-content {
-  width: 56%;
+  width: min(74%, 780px);
   margin: 0 auto;
   border-radius: 6px;
-  padding: clamp(208px, 15.8vw, 238px) clamp(16px, 2.2vw, 30px) clamp(28px, 3.4vw, 44px);
-  background: transparent;
+  padding: clamp(132px, 11vw, 172px) clamp(18px, 2.6vw, 34px) clamp(26px, 3vw, 40px);
+  background:
+    linear-gradient(180deg, rgba(239, 218, 178, 0.8), rgba(213, 183, 134, 0.7)),
+    var(--texture);
+  border: 1px solid rgba(54, 31, 15, 0.34);
   color: #0d0906;
-  box-shadow: none;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 242, 205, 0.26),
+    0 18px 34px rgba(37, 21, 11, 0.16);
 }
 
 .dossier-content::before {
@@ -1066,7 +1071,11 @@ h3 {
 }
 
 .dossier-header {
-  display: none;
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
 }
 
 .dossier-header::before,
@@ -1096,17 +1105,25 @@ h3 {
 }
 
 .dossier-header .kicker {
-  display: none;
+  display: block;
+  margin: 0 0 2px;
+  color: #27170c;
+  font-family: "Courier New", ui-monospace, monospace;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .dossier-header h2 {
   margin: 0;
   color: #6f1f17;
-  font-family: "Courier New", ui-monospace, monospace;
-  font-size: clamp(0.96rem, 1.45vw, 1.18rem);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.55rem, 3vw, 2.6rem);
   font-weight: 950;
   letter-spacing: 0;
-  text-transform: uppercase;
+  line-height: 0.95;
+  text-transform: none;
 }
 
 .dossier-number {
@@ -1131,13 +1148,13 @@ h3 {
 }
 
 .dossier-screen .form-grid {
-  gap: 9px;
+  gap: 12px 16px;
 }
 
 .dossier-screen .field {
-  grid-template-columns: 122px minmax(0, 1fr);
+  grid-template-columns: minmax(132px, 0.35fr) minmax(0, 1fr);
   align-items: center;
-  gap: 6px 12px;
+  gap: 8px 14px;
   font-family: "Courier New", ui-monospace, monospace;
 }
 
@@ -1159,7 +1176,7 @@ h3 {
 }
 
 .dossier-screen .settings-note {
-  margin: -7px 0 0;
+  margin: -4px 0 0;
   color: #22150c;
   font-family: "Courier New", ui-monospace, monospace;
   font-size: 0.76rem;
@@ -1169,11 +1186,11 @@ h3 {
 .dossier-screen input,
 .dossier-screen select,
 .dossier-screen textarea {
-  min-height: 34px;
+  min-height: 42px;
   border-color: rgba(35, 20, 11, 0.5);
-  border-radius: 7px;
-  padding: 8px 10px;
-  background: rgba(238, 218, 177, 0.62);
+  border-radius: 9px;
+  padding: 9px 12px;
+  background: rgba(244, 226, 187, 0.72);
   color: #0b0704;
   font-family: "Courier New", ui-monospace, monospace;
   font-weight: 850;
@@ -1189,15 +1206,15 @@ h3 {
 .dossier-screen .button.secondary,
 .dossier-screen .check-card {
   border-color: rgba(35, 20, 11, 0.5);
-  border-radius: 7px;
-  background: rgba(238, 218, 177, 0.58);
+  border-radius: 9px;
+  background: rgba(244, 226, 187, 0.68);
   color: #0b0704;
   box-shadow: inset 0 1px 0 rgba(255, 244, 214, 0.24), 0 1px 0 rgba(64, 41, 23, 0.08);
 }
 
 .dossier-screen .segmented button {
-  min-height: 31px;
-  padding: 5px 7px;
+  min-height: 42px;
+  padding: 7px 10px;
   font-family: "Courier New", ui-monospace, monospace;
   font-size: 0.84rem;
   font-weight: 900;
@@ -1211,14 +1228,14 @@ h3 {
 
 .dossier-screen .check-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
+  gap: 8px;
 }
 
 .dossier-screen .check-card {
-  min-height: 31px;
+  min-height: 42px;
   grid-template-columns: 18px 1fr;
-  gap: 6px;
-  padding: 5px 7px;
+  gap: 8px;
+  padding: 7px 10px;
   font-family: "Courier New", ui-monospace, monospace;
   font-size: 0.72rem;
   font-weight: 900;
@@ -1232,7 +1249,7 @@ h3 {
 
 .dossier-screen .check-card:has(input:checked) {
   border-color: #8c241c;
-  background: rgba(140, 36, 28, 0.1);
+  background: rgba(140, 36, 28, 0.14);
   color: #8c241c;
 }
 
@@ -1247,20 +1264,20 @@ h3 {
 }
 
 .dossier-screen .names-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 7px;
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+  gap: 8px;
 }
 
 .dossier-start {
   justify-self: center;
-  min-width: min(100%, 300px);
-  min-height: 39px;
+  min-width: min(100%, 380px);
+  min-height: 50px;
   border: 2px solid #8c241c;
-  border-radius: 7px;
+  border-radius: 9px;
   background: #8c241c;
   color: #f6e5bd;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 900;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -1474,8 +1491,36 @@ textarea {
 }
 
 .player-card.checked {
-  filter: saturate(0.7) brightness(0.76);
+  filter: grayscale(0.86) saturate(0.38) brightness(0.48) contrast(0.84);
+  opacity: 0.58;
   border-style: dashed;
+  border-color: rgba(184, 178, 167, 0.34);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.player-card.checked::after {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(180deg, rgba(4, 6, 10, 0.16), rgba(4, 6, 10, 0.52)),
+    repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 10px);
+  content: "";
+  pointer-events: none;
+}
+
+.player-card.checked:hover,
+.player-card.checked:active {
+  transform: none;
+  border-color: rgba(184, 178, 167, 0.34);
+  box-shadow: none;
+}
+
+.player-card.checked > strong,
+.player-card.checked > .card-label {
+  color: rgba(246, 239, 224, 0.64);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
 }
 
 .player-card.selected {
@@ -1986,11 +2031,12 @@ textarea {
 .round-board {
   position: relative;
   display: grid;
-  gap: clamp(14px, 2vw, 20px);
-  min-height: 720px;
+  align-content: center;
+  gap: clamp(16px, 2.6vw, 26px);
+  min-height: min(720px, calc(100vh - 190px));
   border: 1px solid rgba(54, 34, 18, 0.42);
   border-radius: 7px;
-  padding: clamp(58px, 6vw, 82px) clamp(20px, 3.2vw, 38px) clamp(22px, 3vw, 34px);
+  padding: clamp(62px, 6vw, 86px) clamp(18px, 3.2vw, 42px) clamp(22px, 3vw, 38px);
   background:
     linear-gradient(180deg, rgba(230, 203, 155, 0.88), rgba(196, 163, 112, 0.9)),
     var(--texture);
@@ -2035,9 +2081,11 @@ textarea {
 
 .round-layout {
   display: grid;
-  grid-template-columns: minmax(250px, 36%) 1fr;
-  gap: clamp(14px, 2vw, 22px);
-  align-items: stretch;
+  grid-template-columns: minmax(270px, 0.92fr) minmax(300px, 1.08fr);
+  gap: clamp(16px, 2.4vw, 28px);
+  align-items: center;
+  max-width: 980px;
+  margin: 0 auto;
 }
 
 .round-timer-panel,
@@ -2051,8 +2099,8 @@ textarea {
 
 .round-timer-panel {
   display: grid;
-  gap: 14px;
-  padding: clamp(14px, 2vw, 20px);
+  gap: clamp(12px, 1.8vw, 18px);
+  padding: clamp(16px, 2.2vw, 24px);
 }
 
 .round-timer-panel h2,
@@ -2076,7 +2124,7 @@ textarea {
 
 .timer-ring {
   display: grid;
-  width: min(100%, 292px);
+  width: min(100%, 330px);
   aspect-ratio: 1;
   margin: 0 auto;
   place-items: center;
@@ -2125,55 +2173,70 @@ textarea {
 
 .question-card {
   display: grid;
-  justify-items: center;
-  gap: 8px;
-  min-height: 150px;
-  border: 0;
-  border-radius: 3px;
-  padding: 18px;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(12px, 2vw, 18px);
+  min-height: 190px;
+  border: 2px solid rgba(126, 37, 30, 0.42);
+  border-radius: 8px;
+  padding: clamp(18px, 2.6vw, 28px);
   background:
-    linear-gradient(180deg, rgba(236, 214, 174, 0.72), rgba(211, 183, 136, 0.72)),
+    linear-gradient(135deg, rgba(140, 36, 28, 0.16), transparent 42%),
+    linear-gradient(180deg, rgba(244, 224, 184, 0.88), rgba(215, 184, 136, 0.86)),
     var(--texture);
   color: #140e09;
-  box-shadow: 0 10px 18px rgba(47, 31, 17, 0.2);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 242, 205, 0.28),
+    0 14px 26px rgba(47, 31, 17, 0.24);
 }
 
 .question-card .card-mark {
   display: grid;
-  width: 34px;
-  height: 34px;
+  width: clamp(54px, 7vw, 76px);
+  height: clamp(54px, 7vw, 76px);
   place-items: center;
   border-radius: 50%;
   background: #8c241c;
   color: #f6e5bd;
   font-family: system-ui, sans-serif;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
   font-weight: 900;
+  box-shadow: inset 0 0 0 4px rgba(246, 229, 189, 0.16), 0 8px 16px rgba(70, 35, 18, 0.26);
 }
 
 .question-card strong {
   display: block;
-  margin: 0;
+  margin: 0 0 8px;
   color: #7e251e;
   font-family: "Courier New", ui-monospace, monospace;
+  font-size: clamp(0.95rem, 1.8vw, 1.2rem);
   font-weight: 950;
-  text-align: center;
+  text-align: left;
   text-transform: uppercase;
 }
 
 .question-card p {
-  margin-bottom: 0;
+  margin: 0;
   color: #120c07;
   font-family: "Courier New", ui-monospace, monospace;
-  font-size: clamp(0.9rem, 1.5vw, 1.04rem);
-  font-weight: 850;
-  line-height: 1.45;
-  text-align: center;
+  font-size: clamp(1.15rem, 2.4vw, 1.58rem);
+  font-weight: 900;
+  line-height: 1.35;
+  text-align: left;
+}
+
+.question-card.has-question {
+  border-color: rgba(140, 36, 28, 0.72);
+  background:
+    linear-gradient(135deg, rgba(140, 36, 28, 0.22), transparent 48%),
+    linear-gradient(180deg, rgba(248, 229, 190, 0.94), rgba(222, 190, 141, 0.9)),
+    var(--texture);
 }
 
 .round-command-panel {
   display: grid;
-  gap: 14px;
-  padding: clamp(14px, 2vw, 20px);
+  gap: clamp(14px, 2.2vw, 22px);
+  padding: clamp(16px, 2.4vw, 26px);
 }
 
 .round-brief {
@@ -2196,17 +2259,17 @@ textarea {
 
 .round-actions {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
 }
 
 .round-actions .button {
-  min-height: 58px;
+  min-height: 66px;
   border-color: rgba(31, 20, 12, 0.5);
   border-radius: 5px;
   padding: 9px 10px;
   font-family: "Courier New", ui-monospace, monospace;
-  font-size: 0.82rem;
+  font-size: clamp(0.82rem, 1.5vw, 0.98rem);
   font-weight: 950;
   text-transform: uppercase;
 }
@@ -2217,6 +2280,7 @@ textarea {
 }
 
 .round-actions .button.danger {
+  grid-column: 1 / -1;
   background: linear-gradient(180deg, #a83429, #7d2119);
   color: #f6e5bd;
 }
@@ -2576,8 +2640,9 @@ textarea {
   }
 
   .dossier-content {
-    width: 61%;
-    margin: 13% auto 0;
+    width: min(76%, 760px);
+    margin: 0 auto;
+    padding: clamp(118px, 10vw, 150px) clamp(18px, 3vw, 32px) clamp(28px, 4vw, 40px);
   }
 
   .dossier-title h2 {
@@ -2589,7 +2654,7 @@ textarea {
   }
 
   .dossier-screen .field {
-    grid-template-columns: minmax(148px, 0.7fr) minmax(0, 1fr);
+    grid-template-columns: minmax(138px, 0.42fr) minmax(0, 1fr);
   }
 
   .dossier-screen .check-grid {
@@ -2597,13 +2662,13 @@ textarea {
   }
 
   .dossier-screen .names-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .dossier-screen .check-card {
     min-height: 48px;
     padding: 8px 10px;
-    font-size: clamp(0.74rem, 1.65vw, 0.95rem);
+    font-size: clamp(0.72rem, 1.45vw, 0.9rem);
   }
 
   .dossier-start {
@@ -2793,6 +2858,11 @@ textarea {
 
   .topbar h1 {
     font-size: clamp(1.9rem, 12vw, 3rem);
+  }
+
+  body[data-view="settings"] .topbar h1 {
+    font-size: clamp(2rem, 9vw, 2.4rem);
+    line-height: 0.95;
   }
 
   .icon-button {
@@ -3048,13 +3118,15 @@ textarea {
   .round-screen {
     margin: calc(var(--space-2) * -1);
     border-radius: 0;
-    padding: 10px;
+    min-height: auto;
+    padding: 8px;
   }
 
   .round-board {
     min-height: auto;
-    gap: 12px;
-    padding: 58px 10px 16px;
+    align-content: start;
+    gap: 10px;
+    padding: 54px 10px 14px;
   }
 
   .round-file-stamp {
@@ -3072,40 +3144,82 @@ textarea {
 
   .round-layout {
     grid-template-columns: 1fr;
+    gap: 10px;
+    width: 100%;
   }
 
   .timer-ring {
-    width: min(70vw, 230px);
+    width: min(62vw, 210px);
   }
 
   .timer-ring .timer {
-    font-size: clamp(3rem, 17vw, 4.7rem);
+    font-size: clamp(2.8rem, 15vw, 4.35rem);
+  }
+
+  .timer-ring small {
+    margin-top: -22px;
+    font-size: 0.7rem;
   }
 
   .round-timer-panel,
-  .round-command-panel,
-  .round-agents {
-    padding: 12px;
+  .round-command-panel {
+    gap: 10px;
+    padding: 10px;
   }
 
   .round-brief h2,
   .round-timer-panel h2 {
-    font-size: 1.02rem;
+    font-size: 0.98rem;
+  }
+
+  .round-brief {
+    gap: 6px;
+    padding-bottom: 10px;
+  }
+
+  .round-brief p {
+    font-size: 0.84rem;
+    line-height: 1.35;
   }
 
   .question-card {
+    grid-template-columns: 1fr;
     min-height: auto;
-    padding: 14px;
+    gap: 8px;
+    padding: 12px;
+    text-align: center;
+  }
+
+  .question-card .card-mark {
+    width: 38px;
+    height: 38px;
+    margin: 0 auto;
+    font-size: 1.3rem;
+  }
+
+  .question-card strong {
+    margin-bottom: 4px;
+    font-size: 0.78rem;
+    text-align: center;
+  }
+
+  .question-card p {
+    font-size: clamp(1rem, 5.2vw, 1.32rem);
+    line-height: 1.24;
+    text-align: center;
   }
 
   .round-actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
 
   .round-actions .button {
     width: 100%;
-    min-height: 52px;
-    font-size: 0.78rem;
+    min-height: 48px;
+    padding: 8px;
+    font-size: 0.72rem;
+    line-height: 1.12;
   }
 
   .round-settings-preview > div {
@@ -3254,6 +3368,10 @@ textarea {
     gap: 8px;
     text-align: left;
     margin-bottom: 10px;
+  }
+
+  .dossier-header h2 {
+    font-size: clamp(1.8rem, 9vw, 2.65rem);
   }
 
   .dossier-header::before,

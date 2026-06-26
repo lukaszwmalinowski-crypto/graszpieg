@@ -131,6 +131,7 @@ const DEFAULTS = {
   placeSets: ["classic"]
 };
 const LEGACY_SAMPLE_NAMES = ["Ania", "Bartek", "Celina", "Darek"];
+const USED_PLACES_KEY = "szpieg-used-places";
 
 let view = "home";
 let historyStack = [];
@@ -331,14 +332,6 @@ function renderSettings() {
           <span class="evidence-photo suspect-photo"><span>Obserwacja</span></span>
         </aside>
         <div class="dossier-content">
-          <header class="dossier-header">
-            <span class="dossier-emblem">♠</span>
-            <div>
-              <p class="kicker">akta operacji</p>
-              <h2>Ustawienia gry</h2>
-            </div>
-            <p class="dossier-number">Dossier nr.<br><strong>847-AC</strong></p>
-          </header>
           <div class="form-grid">
         <label class="field">
           <span>Liczba graczy</span>
@@ -485,14 +478,16 @@ function startGame(options = {}) {
     });
   const previousSpyName = samePlayers ? game.players[game.spyIndex]?.name : "";
   const places = samePlayers && game.placePool?.length ? game.placePool : getPlaces();
+  const placePoolSignature = samePlayers && game.placePoolSignature ? game.placePoolSignature : getPlacePoolSignature(places);
   if (players.length < 3) return showToast("Potrzeba minimum 3 graczy.");
   if (!samePlayers && !getSelectedPlaceSets().length) return showToast("Wybierz przynajmniej jedną kategorię miejsc.");
   if (places.length < 10) return showToast("Wybrane miejsca muszą mieć łącznie minimum 10 haseł.");
 
   game = {
     players,
-    place: draw(places),
+    place: drawPlaceWithoutRepeat(places, placePoolSignature),
     placePool: places,
+    placePoolSignature,
     spyIndex: drawSpyIndex(players, previousSpyName),
     currentRevealIndex: null,
     roundSeconds: Number(preferences.roundMinutes) * 60,
@@ -552,7 +547,7 @@ function renderCards() {
       </div>
       <div class="cards-grid">
         ${game.players.map((player, index) => `
-          <button class="player-card ${player.checked ? "checked" : ""} ${index === nextUncheckedIndex ? "next" : ""}" data-player="${index}" type="button">
+          <button class="player-card ${player.checked ? "checked" : ""} ${index === nextUncheckedIndex ? "next" : ""}" data-player="${index}" type="button" ${player.checked ? 'data-locked="true"' : ""}>
             <strong>${escapeHtml(player.name)}</strong>
             <span class="card-label">${player.checked ? "Sprawdzone i ukryte" : index === nextUncheckedIndex ? "Następny gracz" : "Czeka na swoją kolej"}</span>
           </button>
@@ -665,10 +660,6 @@ function renderRound() {
   if (!game) return setView("settings", false);
   screenTitle.textContent = "Runda";
   const progress = getRoundProgress();
-  const selectedSets = getSelectedPlaceSets();
-  const categories = selectedSets.length === 1
-    ? (selectedSets[0] === "custom" ? "Własna lista" : PLACE_SETS[selectedSets[0]]?.label || "Miejsca")
-    : `${selectedSets.length} kategorie`;
   app.innerHTML = html`
     <section class="screen active round-screen">
       <div class="round-board">
@@ -683,56 +674,27 @@ function renderRound() {
                 <small>${game.paused ? "pauza" : "pozostało"}</small>
               </div>
             </div>
-            <div class="question-card">
-              <span class="card-mark">?</span>
-              <strong>Pytanie pomocnicze</strong>
-              <p>${game.question ? escapeHtml(game.question) : "Wylosuj pytanie pomocnicze, jeśli rozmowa potrzebuje iskry."}</p>
-            </div>
           </aside>
           <div class="round-command-panel">
             <div class="round-brief">
-              <h2>Zadawajcie sobie pytania</h2>
-              <p>Odpowiedzi muszą być konkretne, ale nie mogą zbyt łatwo zdradzić miejsca.</p>
+              <h2>Rozmowa trwa</h2>
+              <p>Zadawajcie pytania, obserwujcie odpowiedzi i nie zdradzajcie miejsca wprost.</p>
+            </div>
+            <div class="question-card ${game.question ? "has-question" : ""}">
+              <span class="card-mark">?</span>
+              <div>
+                <strong>Pytanie pomocnicze</strong>
+                <p>${game.question ? escapeHtml(game.question) : "Wylosuj pytanie pomocnicze, jeśli rozmowa potrzebuje iskry."}</p>
+              </div>
             </div>
             <div class="round-actions">
               <button class="button secondary" data-action="pause" ${game.paused ? "disabled" : ""} type="button">Pauza</button>
               <button class="button secondary" data-action="resume" ${game.paused ? "" : "disabled"} type="button">Wznów</button>
-              <button class="button secondary" data-action="question" type="button">Losowe pytanie</button>
+              <button class="button secondary" data-action="question" type="button">Losowe pytanie pomocnicze</button>
               <button class="button danger" data-action="end-round" type="button">Zakończ rundę</button>
-            </div>
-            <div class="round-settings-preview">
-              <h3>Podgląd ustawień</h3>
-              <div>
-                <article>
-                  <span class="round-stat-icon players"></span>
-                  <small>Liczba graczy</small>
-                  <strong>${game.players.length} graczy</strong>
-                </article>
-                <article>
-                  <span class="round-stat-icon clock"></span>
-                  <small>Czas rundy</small>
-                  <strong>${Math.round(game.roundSeconds / 60)} minut</strong>
-                </article>
-                <article>
-                  <span class="round-stat-icon folder"></span>
-                  <small>Kategorie miejsc</small>
-                  <strong>${escapeHtml(categories)}</strong>
-                </article>
-              </div>
             </div>
           </div>
         </div>
-        <section class="round-agents" aria-label="Agenci">
-          <h3>Agenci</h3>
-          <div>
-            ${game.players.map((player) => `
-              <article class="round-agent-card">
-                <span></span>
-                <strong>${escapeHtml(player.name)}</strong>
-              </article>
-            `).join("")}
-          </div>
-        </section>
       </div>
     </section>
   `;
@@ -965,6 +927,38 @@ function getRoundProgress() {
 
 function draw(items) {
   return items[Math.floor(Math.random() * items.length)];
+}
+
+function drawPlaceWithoutRepeat(places, signature) {
+  const usedPlaces = loadUsedPlaces();
+  const alreadyUsed = new Set(usedPlaces[signature] || []);
+  let available = places.filter((place) => !alreadyUsed.has(place));
+  if (!available.length) {
+    available = [...places];
+    usedPlaces[signature] = [];
+  }
+  const place = draw(available);
+  usedPlaces[signature] = unique([...(usedPlaces[signature] || []), place])
+    .filter((item) => places.includes(item));
+  saveUsedPlaces(usedPlaces);
+  return place;
+}
+
+function getPlacePoolSignature(places) {
+  return unique(places).sort((a, b) => a.localeCompare(b, "pl")).join("|");
+}
+
+function loadUsedPlaces() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(USED_PLACES_KEY)) || {};
+    return saved && typeof saved === "object" ? saved : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveUsedPlaces(usedPlaces) {
+  localStorage.setItem(USED_PLACES_KEY, JSON.stringify(usedPlaces));
 }
 
 function drawSpyIndex(players, previousSpyName = "") {
