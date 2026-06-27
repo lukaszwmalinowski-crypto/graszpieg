@@ -133,7 +133,7 @@ const DEFAULTS = {
 const LEGACY_SAMPLE_NAMES = ["Ania", "Bartek", "Celina", "Darek"];
 const USED_PLACES_KEY = "szpieg-used-places";
 const PUBLIC_GAME_URL = "https://lukaszwmalinowski-crypto.github.io/graszpieg/";
-const APP_VERSION = "v76";
+const APP_VERSION = "v77";
 
 let view = "home";
 let historyStack = [];
