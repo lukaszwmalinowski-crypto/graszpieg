@@ -133,6 +133,7 @@ const DEFAULTS = {
 const LEGACY_SAMPLE_NAMES = ["Ania", "Bartek", "Celina", "Darek"];
 const USED_PLACES_KEY = "szpieg-used-places";
 const PUBLIC_GAME_URL = "https://lukaszwmalinowski-crypto.github.io/graszpieg/";
+const APP_VERSION = "v76";
 
 let view = "home";
 let historyStack = [];
@@ -217,6 +218,7 @@ function render() {
     cards: renderCards,
     reveal: renderReveal,
     round: renderRound,
+    voteIntro: renderVoteIntro,
     vote: renderVote,
     spyGuess: renderSpyGuess,
     result: renderResult
@@ -240,10 +242,16 @@ function renderHome() {
         </div>
         <button class="button compact" data-action="install" type="button" id="installButton">Instaluj</button>
       </div>
+      <button class="version-check-button" data-action="version-check" type="button" aria-label="Sprawdź wersję gry">
+        Wersja ${APP_VERSION}
+      </button>
     </section>
   `;
   document.querySelector('[data-action="new-game"]').addEventListener("click", () => setView("settings"));
   document.querySelector('[data-action="help"]').addEventListener("click", () => setView("help"));
+  document.querySelector('[data-action="version-check"]').addEventListener("click", () => {
+    showToast(`Aktualna wersja gry: ${APP_VERSION}`);
+  });
   const installButton = document.querySelector("#installButton");
   if (installButton) installButton.addEventListener("click", installApp);
 }
@@ -756,7 +764,7 @@ function renderRound() {
     game.question = draw(QUESTIONS);
     renderRound();
   });
-  document.querySelector('[data-action="end-round"]').addEventListener("click", () => setView("vote"));
+  document.querySelector('[data-action="end-round"]').addEventListener("click", () => setView("voteIntro"));
   startTimer();
 }
 
@@ -777,13 +785,26 @@ function startTimer() {
       clearInterval(timerId);
       game.paused = true;
       showToast("Czas rundy minął.");
-      setView("vote");
+      setView("voteIntro");
     }
   }, 1000);
 }
 
 function stopTimerIfNeeded() {
   if (view !== "round") clearInterval(timerId);
+}
+
+function renderVoteIntro() {
+  if (!game) return setView("settings", false);
+  screenTitle.textContent = "Wskaż szpiega";
+  app.innerHTML = html`
+    <section class="screen active vote-intro-screen" aria-label="Czas wskazać szpiega">
+      <button class="vote-intro-card" data-action="continue-vote" type="button" aria-label="Przejdź do głosowania">
+        <img src="./icons-lite/vote-intro.jpg" alt="Czas wskazać szpiega. Kliknij, aby przejść do głosowania.">
+      </button>
+    </section>
+  `;
+  document.querySelector('[data-action="continue-vote"]').addEventListener("click", () => setView("vote"));
 }
 
 function renderVote() {

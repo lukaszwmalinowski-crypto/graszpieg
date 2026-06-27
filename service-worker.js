@@ -1,4 +1,4 @@
-const CACHE_NAME = "szpieg-v73";
+const CACHE_NAME = "szpieg-v76";
 const FILES_TO_CACHE = [
   "./",
   "./index.html",
@@ -27,7 +27,8 @@ const FILES_TO_CACHE = [
   "./icons-lite/help-step-5.jpg",
   "./icons-lite/install-android.jpg",
   "./icons-lite/install-iphone.jpg",
-  "./icons-lite/round-screen.jpg"
+  "./icons-lite/round-screen.jpg",
+  "./icons-lite/vote-intro.jpg"
 ];
 
 self.addEventListener("install", (event) => {

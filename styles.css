@@ -262,6 +262,35 @@ h3 {
   backdrop-filter: blur(8px);
 }
 
+.version-check-button {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: max(10px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  border: 1px solid rgba(217, 182, 91, 0.28);
+  border-radius: 999px;
+  padding: 7px 12px;
+  background: rgba(5, 5, 4, 0.48);
+  color: rgba(246, 239, 224, 0.72);
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(8px);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.version-check-button:hover,
+.version-check-button:focus-visible {
+  border-color: rgba(240, 216, 139, 0.64);
+  color: var(--gold-soft);
+  outline: none;
+}
+
 .mission-screen {
   position: relative;
   display: grid !important;
@@ -1706,6 +1735,43 @@ textarea {
   gap: var(--space-3);
 }
 
+.vote-intro-screen {
+  display: grid !important;
+  min-height: calc(100vh - 130px);
+  min-height: calc(100svh - 130px);
+  place-items: center;
+  padding: 0;
+}
+
+.vote-intro-card {
+  display: block;
+  width: min(100%, calc((100svh - 150px) * 0.75), 720px);
+  max-height: calc(100svh - 150px);
+  border: 0;
+  border-radius: 10px;
+  padding: 0;
+  background: #080706;
+  box-shadow: 0 26px 72px rgba(0, 0, 0, 0.54);
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 140ms ease, box-shadow 140ms ease, filter 140ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.vote-intro-card:hover,
+.vote-intro-card:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 30px 82px rgba(0, 0, 0, 0.62), 0 0 0 3px rgba(217, 182, 91, 0.22);
+  filter: brightness(1.04);
+  outline: none;
+}
+
+.vote-intro-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .vote-confirm {
   margin: var(--space-3) 0 0;
 }
@@ -3012,6 +3078,12 @@ textarea {
     font-size: clamp(1.9rem, 12vw, 3rem);
   }
 
+  body[data-view="result"] .topbar h1 {
+    font-size: clamp(1.55rem, 8.8vw, 2.25rem);
+    line-height: 1;
+    overflow-wrap: anywhere;
+  }
+
   body[data-view="settings"] .topbar h1 {
     font-size: clamp(2rem, 9vw, 2.4rem);
     line-height: 0.95;
@@ -3077,11 +3149,17 @@ textarea {
   .title-screen .install-panel {
     grid-template-columns: 42px 1fr;
     right: 12px;
-    bottom: 12px;
+    bottom: 46px;
   }
 
   .title-screen .install-panel .button {
     grid-column: 1 / -1;
+  }
+
+  .version-check-button {
+    bottom: max(8px, env(safe-area-inset-bottom));
+    padding: 6px 10px;
+    font-size: 0.64rem;
   }
 
   .mission-screen {
@@ -3243,6 +3321,18 @@ textarea {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     max-width: 430px;
     margin-inline: auto;
+  }
+
+  .vote-intro-screen {
+    min-height: calc(100svh - 86px);
+    margin: calc(var(--space-2) * -1);
+    padding: 8px;
+  }
+
+  .vote-intro-card {
+    width: min(100%, calc((100svh - 102px) * 0.75));
+    max-height: calc(100svh - 102px);
+    border-radius: 7px;
   }
 
   .player-card {
