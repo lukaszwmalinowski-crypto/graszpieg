@@ -1,4 +1,4 @@
-const CACHE_NAME = "szpieg-v77";
+const CACHE_NAME = "szpieg-v79";
 const FILES_TO_CACHE = [
   "./",
   "./index.html",

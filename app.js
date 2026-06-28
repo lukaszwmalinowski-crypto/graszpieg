@@ -133,7 +133,7 @@ const DEFAULTS = {
 const LEGACY_SAMPLE_NAMES = ["Ania", "Bartek", "Celina", "Darek"];
 const USED_PLACES_KEY = "szpieg-used-places";
 const PUBLIC_GAME_URL = "https://lukaszwmalinowski-crypto.github.io/graszpieg/";
-const APP_VERSION = "v77";
+const APP_VERSION = "v79";
 
 let view = "home";
 let historyStack = [];
@@ -245,6 +245,7 @@ function renderHome() {
       <button class="version-check-button" data-action="version-check" type="button" aria-label="Sprawdź wersję gry">
         Wersja ${APP_VERSION}
       </button>
+      <p class="copyright-badge">© Łukasz Malinowski 2026</p>
     </section>
   `;
   document.querySelector('[data-action="new-game"]').addEventListener("click", () => setView("settings"));
@@ -622,7 +623,6 @@ function renderCards() {
       }
       game.currentRevealIndex = playerIndex;
       game.revealFlipped = false;
-      game.revealReady = false;
       setView("reveal");
     });
   });
@@ -644,24 +644,6 @@ function renderReveal() {
   const player = game.players[game.currentRevealIndex];
   const isSpy = game.currentRevealIndex === game.spyIndex;
   screenTitle.textContent = player.name;
-  if (!game.revealReady) {
-    app.innerHTML = html`
-      <section class="screen active handoff-screen">
-        <div class="handoff-dossier">
-          <span class="handoff-stamp">Tajne</span>
-          <p>Przekaż telefon</p>
-          <h2>${escapeHtml(player.name)}</h2>
-          <small>Gdy gracz jest gotowy, niech dotknie ekranu i odbierze swoją kartę.</small>
-          <button class="button handoff-button" data-action="ready-reveal" type="button">Odbierz kartę</button>
-        </div>
-      </section>
-    `;
-    document.querySelector('[data-action="ready-reveal"]').addEventListener("click", () => {
-      game.revealReady = true;
-      renderReveal();
-    });
-    return;
-  }
   app.innerHTML = html`
     <section class="screen active reveal-screen">
       <div class="flip-stage">
@@ -688,7 +670,6 @@ function renderReveal() {
     game.players[game.currentRevealIndex].checked = true;
     game.currentRevealIndex = null;
     game.revealFlipped = false;
-    game.revealReady = false;
     window.setTimeout(() => setView("cards"), 180);
   };
   const toggleReveal = () => {
